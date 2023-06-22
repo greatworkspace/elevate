@@ -5,6 +5,8 @@ import 'welcome2.dart';
 import 'login.dart';
 import 'signup.dart';
 import 'package:splashscreen/splashscreen.dart';
+import 'createpassword.dart';
+import 'confirmpassword.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,6 +25,8 @@ class MyApp extends StatelessWidget {
         "Welcome2": (context) => Welcome2(),
         "Login": (context) => LoginScreen(),
         "Signup": (context) => SignupScreen(),
+        "CreatePassword": (context) => CreatePasswordScreen(),
+        "ConfirmPassword": (context) => ConfirmPasswordScreen(),
       },
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
