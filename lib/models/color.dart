@@ -27,6 +27,18 @@ class ColorClass {
     required this.settingsTileColor,
     required this.searchColor,
     required this.transactionDivider,
+    required this.thumbColor,
+    required this.iconBlue,
+    required this.fieldColor,
+    required this.selectfieldColor,
+    required this.fieldBorder,
+    required this.inactiveIcon,
+    required this.headerDivider,
+    required this.barBackground,
+    required this.floatBg,
+    required this.darkText1,
+    required this.kunleStroke,
+    required this.loadingBg,
   });
   final int id;
   final String name;
@@ -53,4 +65,16 @@ class ColorClass {
   final Color settingsTileColor;
   final Color searchColor;
   final Color transactionDivider;
+  final Color thumbColor;
+  final Color iconBlue;
+  final Color fieldColor;
+  final Color selectfieldColor;
+  final Color fieldBorder;
+  final Color inactiveIcon;
+  final Color headerDivider;
+  final Color barBackground;
+  final Color floatBg;
+  final Color darkText1;
+  final Color kunleStroke;
+  final Color loadingBg;
 }

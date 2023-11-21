@@ -1,93 +1,94 @@
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 
-class Loader {
-  static final Loader appLoader = Loader();
-  ValueNotifier<bool> loaderShowingNotifier = ValueNotifier(false);
-  ValueNotifier<String> loaderTextNotifier = ValueNotifier('error message');
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'dart:async';
+import 'models/databaseHelper.dart';
 
-  void showLoader() {
-    loaderShowingNotifier.value = true;
-  }
 
-  void hideLoader() {
-    loaderShowingNotifier.value = false;
-  }
+dynamic mode = mode;
 
-  void setText({String? errorMessage}) {
-    loaderTextNotifier.value = 'input string';
-  }
 
-  void setImage() {
-    // same as that of setText //
-  }
-}
 
-class OverlayView extends StatelessWidget {
-  const OverlayView({
-    Key? key,
-  }) : super(key: key);
+class OverlayL extends StatefulWidget {
+  const OverlayL({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: Loader.appLoader.loaderShowingNotifier,
-      builder: (context, value, child) {
-        if (value) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration:
-                BoxDecoration(color: Color.fromRGBO(100, 100, 100, 450)),
-            child: Center(
-              child: Container(
-                width: 50,
-                child: LoadingAnimationWidget.twistingDots(
-                  leftDotColor: const Color.fromRGBO(100, 100, 100, 100),
-                  rightDotColor: const Color.fromRGBO(500, 5, 5, 40),
-                  size: 70,
-                ),
-              ),
-            ),
-          );
-        } else {
-          return Container();
-        }
-      },
-    );
-  }
+  State<OverlayL> createState() => _OverlayLState();
 }
 
-class FullOverlayView extends StatelessWidget {
-  const FullOverlayView({
-    Key? key,
-  }) : super(key: key);
+class _OverlayLState extends State<OverlayL> with TickerProviderStateMixin {
 
+  void getMode() async {
+    Map settings = await DatabaseHelper.instance.getSettings();
+    String? mymode = settings['mode'];
+    if (mymode == null) {
+      setState(() {
+        mode = lightmode;
+      });
+    } else if (mymode == 'Dark') {
+      setState(() {
+        mode = darkmode;
+      });
+    } else {
+      setState(() {
+        mode = lightmode;
+      });
+    }
+  }
+
+
+
+  void initState() {
+    super.initState();
+    getMode();
+    initializeDateFormatting();
+  }
   @override
+
+
+
+
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: Loader.appLoader.loaderShowingNotifier,
-      builder: (context, value, child) {
-        if (value) {
-          return Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(color: Color(0x212121)),
-            child: Center(
-              child: Container(
-                width: 50,
-                child: LoadingAnimationWidget.twistingDots(
-                  leftDotColor: Colors.red,
-                  rightDotColor: Colors.blue,
-                  size: 70,
-                ),
-              ),
-            ),
-          );
-        } else {
-          return Container();
-        }
-      },
-    );
+    late final AnimationController _controller = AnimationController(
+  duration: const Duration(seconds: 5),
+  vsync: this,
+)..repeat(reverse: false);
+
+late final Animation<double> _animation = CurvedAnimation(
+  parent: _controller,
+  curve: Curves.linear,
+);
+
+
+
+
+    Widget CustomLoader = RotationTransition(
+        turns: _animation,
+        child: Container(
+          child: SvgPicture.asset(
+            'assets/svg/loader_icon.svg',
+            height: 30,
+            width: 40,
+            color: const Color(0xffF6B41A),
+          ),
+        ));
+    Widget loading(Color mycolor) {
+      return Builder(builder: (context) {
+        double myHeight = MediaQuery.of(context).size.height;
+        double myWidth = MediaQuery.of(context).size.width;
+        return Container(
+          height: myHeight,
+          width: myWidth,
+          color: mycolor,
+          child: Center(
+            child: CustomLoader,
+          ),
+        );
+      });
+    }
+
+    return loading(mode.background1);
   }
 }
