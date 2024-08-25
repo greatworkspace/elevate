@@ -18,27 +18,7 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 String accountNo = '012345678';
 
@@ -106,21 +86,6 @@ class _BankDetailsState extends State<BankDetails>
 
           Widget continuebtn;
 
-          Widget greycontinue = TextButton(
-            onPressed: () async {},
-            child: const Text(
-              'Change',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
-            style: ButtonStyle(
-              backgroundColor:
-                  MaterialStateProperty.all<Color>(const Color(0xff777777)),
-              shape: MaterialStateProperty.all(RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0))),
-            ),
-          );
 
           Widget realcontinue = TextButton(
             onPressed: () {

@@ -1,10 +1,11 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:elevate/home.dart';
 import 'package:elevate/humanizeAmount.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'models/databaseHelper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -22,27 +23,7 @@ dynamic getKey(key) {
 dynamic shakey = KeyClass.shakeKey1;
 List targets = List.empty();
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 bool warnText = true;
 int targetD = 0;
@@ -115,45 +96,8 @@ class _TargetSavingState extends State<TargetSaving>
   @override
   Widget build(BuildContext context) {
     dynamic mode = widget.amode;
-    String withdrawNo = '0';
-    String interestNo = '9,000';
-    String percentNo = '1.5';
 
-    bool inivalue;
 
-    Widget HideBalSwitch() {
-      if (hiddenbalCon.text == 'true') {
-        inivalue = true;
-      } else {
-        inivalue = false;
-      }
-
-      return Transform.scale(
-        scale: 0.9,
-        child: CupertinoSwitch(
-          value: inivalue,
-          onChanged: (value) async {
-            setState(() {
-              inivalue = value;
-            });
-            if (value == true) {
-              await DatabaseHelper.instance.sethide('true');
-              setState(() {
-                hiddenbalCon.text = 'true';
-              });
-            } else {
-              await DatabaseHelper.instance.sethide('false');
-              setState(() {
-                hiddenbalCon.text = 'false';
-              });
-            }
-          },
-          activeColor: const Color(0xffD9D9D9),
-          trackColor: const Color(0xffD9D9D9),
-          thumbColor: mode.thumbColor,
-        ),
-      );
-    }
 
     double interest = 0;
     for (var item in targets) {
@@ -379,7 +323,6 @@ class _TargetSavingState extends State<TargetSaving>
                           iniwidth = myWidth;
                         }
                         double btnWidth = iniwidth * 58 / 100 - 41;
-                        double btnWidth2 = iniwidth * 42 / 100 - 41;
                         double btnHeight = (iniwidth * 60 / 100) / 7;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -484,10 +427,9 @@ class _TargetSavingState extends State<TargetSaving>
                           iniwidth = myWidth;
                         }
                         double btnWidth = iniwidth * 58 / 100 - 41;
-                        double btnWidth2 = iniwidth * 42 / 100 - 41;
                         double btnHeight = (iniwidth * 60 / 100) / 7;
                         return Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Container(
                               width: 200,

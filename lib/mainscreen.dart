@@ -1,8 +1,11 @@
-import 'package:flutter/gestures.dart';
+// ignore_for_file: unnecessary_null_comparison, unused_local_variable, must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'home.dart';
 import 'models/databaseHelper.dart';
 import 'models/user.dart';
@@ -14,10 +17,23 @@ import 'humanizeAmount.dart';
 
 const apiUrl = 'https://finx.ginnsltd.com/mobile/';
 
+dynamic loan = {};
+dynamic installs = [];
+Map saving = {};
+dynamic invests = {};
+dynamic investA = {};
+dynamic installments = List.empty();
+String hello = '';
+dynamic officer = {};
+User? user = null;
 List loanProducts = List.empty();
-final myhomecardcontroller = ScrollController();
+final myhomecardcontroller = ItemScrollController();
+ItemPositionsListener myhomecardcontrollerlis = ItemPositionsListener.create();
 double homecardpos = 0.0;
 int homecardindex = 1;
+double cardheight = 0;
+bool gotdata = false;
+
 dynamic getKey(key) {
   if (key == KeyClass.shakeKey2) {
     return KeyClass.shakeKey1;
@@ -28,27 +44,14 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
+List<dynamic> inielevatebank = [
+  '',
+  '',
+  '',
+  '',
 ];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
+List<dynamic> elevatebank = List.empty();
 
 class MainScreen extends StatefulWidget {
   MainScreen({
@@ -64,8 +67,8 @@ class MainScreen extends StatefulWidget {
 
 dynamic loanpi = -1;
 dynamic mode = mode;
-bool _open = false;
 bool loanMode = false;
+String mystate = 'got';
 
 class _MainScreenState extends State<MainScreen>
     with SingleTickerProviderStateMixin {
@@ -84,27 +87,171 @@ class _MainScreenState extends State<MainScreen>
   );
 
   int _index = 0;
+  String loanurl = 'https://elevatemfb.com/loan/services/';
+  String investurl = 'https:/elevatemfb.com/investment/services/';
 
   DateFormat dateFormat = DateFormat.yMMMMd();
 
   Future mgetUser() async {
     dynamic got = await DatabaseHelper.instance.getUser();
-    dynamic loan = await DatabaseHelper.instance.getLoan();
-    dynamic installments = await DatabaseHelper.instance.getInstallment();
+    dynamic loana = await DatabaseHelper.instance.getLoan();
+    dynamic installmentsa = await DatabaseHelper.instance.getInstallment();
     dynamic loanP = await DatabaseHelper.instance.getLoanP();
+    dynamic savinga = await DatabaseHelper.instance.getSaving();
+    dynamic invest = await DatabaseHelper.instance.getInvestment();
+    dynamic investa = await DatabaseHelper.instance.getInvestA();
+    dynamic officera = await DatabaseHelper.instance.getOfficer();
+    if (mystate == 'got') {
+      setState(() {
+        user = got;
+        loan = loana;
+        installs = installmentsa;
+        loanProducts = loanP;
+        saving = savinga;
+        invests = invest;
+        investA = investa;
+        hello = 'Hello, ' + got.firstname;
+        officer = officera;
+        gotdata = true;
+      });
+    }
 
-    return {
-      'data': got,
-      'loan': loan,
-      'installments': installments,
-      'loanP': loanP,
-    };
+    return (true);
+  }
+
+  Future getelevatebank() async {
+    String url = apiUrl + 'get/elevate/bank/';
+    dynamic token = await DatabaseHelper.instance.getToken();
+    Response res2 = await post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'token': token,
+      },
+      body: (<String, String>{}),
+    );
+    if (res2.statusCode == 200) {
+      dynamic data = json.decode(res2.body);
+      elevatebank[0] = data['account_number'];
+      elevatebank[1] = data['name'];
+      elevatebank[2] = data['bank_name'];
+      elevatebank[3] = data['reference'];
+    }
+  }
+
+  _launchURL() async {
+    final Uri url = Uri.parse(loanurl);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch ${url}');
+    }
+  }
+
+  _launchURL2() async {
+    final Uri url = Uri.parse(investurl);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch ${url}');
+    }
+  }
+
+  Future regetdata3() async {
+    setState(() {
+      mystate = 'getting';
+    });
+    await regetdata2();
+    Future.delayed(Duration(seconds: 2)).then((value) {
+      setState(() {
+        mystate = 'got';
+      });
+    });
+
+    if (gotstate == 'network') {
+      double myWidth2 = MediaQuery.of(context).size.width;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(myWidth2 / 4, 0, myWidth2 / 4, 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth2 / 2,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Network Error',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      await Future.delayed(Duration(seconds: 5));
+      regetdata(context, mode);
+    }
+    if (gotstate == 'timeout') {
+      double myWidth2 = MediaQuery.of(context).size.width;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(myWidth2 / 4, 0, myWidth2 / 4, 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth2 / 2,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Request Timeout',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      regetdata(context, mode);
+    }
   }
 
   void initState() {
     super.initState();
     initializeDateFormatting();
     dateFormat = new DateFormat.yMMMMd('en');
+    elevatebank = inielevatebank;
   }
 
   void dispose() {
@@ -130,24 +277,78 @@ class _MainScreenState extends State<MainScreen>
     return FutureBuilder(
         future: mgetUser(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasData) {
-            User user = snapshot.data['data'];
-            String imageurl = 'assets/images/default_pic.png';
-            if (user.image != '' || user.image != null) {
-              imageurl = user.image;
+          if (snapshot.hasData || gotdata) {
+            installments = installs.reversed.toList();
+            Widget imagecon2() {
+              if (user!.image == '' || user!.image == null) {
+                return Container(
+                  height: 40,
+                  width: 40,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(42),
+                    child: Image.asset(
+                      'assets/images/default_pic.png',
+                      width: 40,
+                      cacheHeight: 80,
+                      cacheWidth: 80,
+                    ),
+                  ),
+                );
+              } else {
+                return Container(
+                  height: 40,
+                  width: 40,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(42),
+                    child: Image.network(
+                      user!.image,
+                      width: 40,
+                      cacheHeight: 80,
+                      cacheWidth: 80,
+                    ),
+                  ),
+                );
+              }
             }
-            
-            dynamic loan = snapshot.data['loan'];
+
+            Widget imagecon3() {
+              if (user!.image == '' || user!.image == null) {
+                return Container(
+                  height: 37.8,
+                  width: 37.8,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(42),
+                    child: Image.asset(
+                      'assets/images/default_pic.png',
+                      width: 37.8,
+                      cacheHeight: 80,
+                      cacheWidth: 80,
+                    ),
+                  ),
+                );
+              } else {
+                return Container(
+                  height: 37.8,
+                  width: 37.8,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(42),
+                    child: Image.network(
+                      user!.image,
+                      width: 37.8,
+                      cacheHeight: 80,
+                      cacheWidth: 80,
+                    ),
+                  ),
+                );
+              }
+            }
+
             if (loan['id'] == null) {
               loanMode = false;
             } else {
               loanMode = true;
             }
-            dynamic installs = snapshot.data['installments'];
-            loanProducts = snapshot.data['loanP'];
-            dynamic installments = installs.reversed.toList();
-            String hello = 'Hello, ' + user.firstname;
-            
+
             if (loanMode == false) {
               return Scaffold(
                 body: SafeArea(
@@ -332,12 +533,11 @@ class _MainScreenState extends State<MainScreen>
                                       item['Pimage'] ?? '',
                                       fit: BoxFit.cover,
                                       height: (myWidth - 100) / 1.9529411,
-                                      cacheHeight:
-                                          (((myWidth - 100) / 1.9529411))
-                                              .toInt(),
                                       width: myWidth - 100,
-                                      cacheWidth: ((myWidth - 100)).toInt(),
-                                      filterQuality: FilterQuality.high,
+                                      cacheHeight:
+                                          ((myWidth - 100) ~/ 1.9529411)
+                                              .floor(),
+                                      cacheWidth: ((myWidth - 100)).floor(),
                                     ),
                                   ),
                                   Padding(
@@ -429,9 +629,8 @@ class _MainScreenState extends State<MainScreen>
                                       height: (((myWidth - 40) / 3) - 3.3334) /
                                           1.9529411,
                                       cacheHeight:
-                                          (((((myWidth - 40) / 3) - 3.3334) /
-                                                  1.9529411))
-                                              .toInt(),
+                                          (((myWidth - 40) / 3) - 3.3334) ~/
+                                              1.9529411,
                                       width: ((myWidth - 40) / 3) - 3.3334,
                                       cacheWidth:
                                           ((((myWidth - 40) / 3) - 3.3334))
@@ -503,179 +702,209 @@ class _MainScreenState extends State<MainScreen>
                     if (myWidth < 768) {
                       return Column(
                         children: [
-                          Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20)),
+                          SizedBox(
                             width: myWidth - 20,
                             height: (myWidth - 20) / 2.597,
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  'assets/images/lastcard1.png',
-                                  height: (myWidth - 20) / 2.597,
-                                  width: myWidth - 20,
-                                  fit: BoxFit.fitWidth,
-                                  filterQuality: FilterQuality.high,
-                                ),
-                                SizedBox(
-                                  width: (myWidth - 20) * 70 / 100,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: ((myWidth - 20) / 2.597) *
-                                              55 /
-                                              100,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Text(
-                                                'Obtain loans that are tailored to your needs',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12.56,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              const SizedBox(height: 5),
-                                              SizedBox(
-                                                width:
-                                                    (myWidth - 20) * 45 / 100,
-                                                child: const Text(
-                                                  'Our loan service provides  you with the best loans.',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 8.5,
-                                                      fontWeight:
-                                                          FontWeight.w200),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: (((myWidth - 20) / 2.597) *
-                                                  20 /
-                                                  100) *
-                                              2.294,
-                                          height: ((myWidth - 20) / 2.597) *
-                                              20 /
-                                              100,
-                                          decoration: BoxDecoration(
-                                              color: const Color(0xff231E54),
-                                              borderRadius:
-                                                  BorderRadius.circular(9.37)),
-                                          child: const TextButton(
-                                            onPressed: null,
-                                            child: Center(
-                                              child: Text(
-                                                'Apply Now',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 6.56,
-                                                ),
+                            child: TextButton(
+                              onPressed: _launchURL,
+                              style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20)),
+                                width: myWidth - 20,
+                                height: (myWidth - 20) / 2.597,
+                                child: Stack(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/lastcard1.png',
+                                      height: (myWidth - 20) / 2.597,
+                                      width: myWidth - 20,
+                                      fit: BoxFit.fitWidth,
+                                      cacheHeight:
+                                          (((myWidth - 20) / 2.597) * 2)
+                                              .floor(),
+                                      cacheWidth: ((myWidth - 20) * 2).floor(),
+                                    ),
+                                    SizedBox(
+                                      width: (myWidth - 20) * 70 / 100,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: ((myWidth - 20) / 2.597) *
+                                                  55 /
+                                                  100,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const Text(
+                                                    'Obtain loans that are tailored to your needs',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12.56,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  SizedBox(
+                                                    width: (myWidth - 20) *
+                                                        45 /
+                                                        100,
+                                                    child: const Text(
+                                                      'Our loan service provides  you with the best loans.',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 8.5,
+                                                          fontWeight:
+                                                              FontWeight.w200),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
+                                            Container(
+                                              width: (((myWidth - 20) / 2.597) *
+                                                      20 /
+                                                      100) *
+                                                  2.294,
+                                              height: ((myWidth - 20) / 2.597) *
+                                                  20 /
+                                                  100,
+                                              decoration: BoxDecoration(
+                                                  color:
+                                                      const Color(0xff231E54),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          9.37)),
+                                              child: const TextButton(
+                                                onPressed: null,
+                                                child: Center(
+                                                  child: Text(
+                                                    'Apply Now',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 6.56,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                           const SizedBox(
                             height: 10,
                           ),
-                          Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(20)),
+                          SizedBox(
                             width: myWidth - 20,
                             height: (myWidth - 20) / 2.597,
-                            child: Stack(
-                              children: [
-                                Image.asset(
-                                  'assets/images/lastcard2.png',
-                                  height: (myWidth - 20) / 2.597,
-                                  width: myWidth - 20,
-                                  fit: BoxFit.fitWidth,
-                                  filterQuality: FilterQuality.high,
-                                ),
-                                SizedBox(
-                                  width: (myWidth - 20) * 75 / 100,
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(15.0),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        SizedBox(
-                                          height: ((myWidth - 20) / 2.597) *
-                                              55 /
-                                              100,
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              const Text(
-                                                'Grow and monitor your wealth with our Investment account',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 12.56,
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              const SizedBox(height: 5),
-                                              SizedBox(
-                                                width:
-                                                    (myWidth - 20) * 45 / 100,
-                                                child: const Text(
-                                                  'EA provides you with a portfolio for growing your wealth.',
-                                                  style: TextStyle(
-                                                      color: Colors.white,
-                                                      fontSize: 8.5,
-                                                      fontWeight:
-                                                          FontWeight.w200),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                        Container(
-                                          width: (((myWidth - 20) / 2.597) *
-                                                  20 /
-                                                  100) *
-                                              2.959,
-                                          height: ((myWidth - 20) / 2.597) *
-                                              20 /
-                                              100,
-                                          decoration: BoxDecoration(
-                                              color: const Color(0xff231E54),
-                                              borderRadius:
-                                                  BorderRadius.circular(9.37)),
-                                          child: const TextButton(
-                                            onPressed: null,
-                                            child: Center(
-                                              child: Text(
-                                                'Start Investing',
-                                                style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 6.56,
-                                                ),
+                            child: TextButton(
+                              onPressed: _launchURL2,
+                              style: TextButton.styleFrom(
+                                  padding: EdgeInsets.zero),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(20)),
+                                width: myWidth - 20,
+                                height: (myWidth - 20) / 2.597,
+                                child: Stack(
+                                  children: [
+                                    Image.asset(
+                                      'assets/images/lastcard2.png',
+                                      height: (myWidth - 20) / 2.597,
+                                      width: myWidth - 20,
+                                      fit: BoxFit.fitWidth,
+                                      cacheHeight:
+                                          (((myWidth - 20) / 2.597) * 2)
+                                              .floor(),
+                                      cacheWidth: ((myWidth - 20) * 2).floor(),
+                                    ),
+                                    SizedBox(
+                                      width: (myWidth - 20) * 75 / 100,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(15.0),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              height: ((myWidth - 20) / 2.597) *
+                                                  55 /
+                                                  100,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  const Text(
+                                                    'Grow and monitor your wealth with our Investment account',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12.56,
+                                                        fontWeight:
+                                                            FontWeight.bold),
+                                                  ),
+                                                  const SizedBox(height: 5),
+                                                  SizedBox(
+                                                    width: (myWidth - 20) *
+                                                        45 /
+                                                        100,
+                                                    child: const Text(
+                                                      'EA provides you with a portfolio for growing your wealth.',
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 8.5,
+                                                          fontWeight:
+                                                              FontWeight.w200),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
-                                          ),
-                                        )
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
+                                            Container(
+                                              width: (((myWidth - 20) / 2.597) *
+                                                      20 /
+                                                      100) *
+                                                  2.959,
+                                              height: ((myWidth - 20) / 2.597) *
+                                                  20 /
+                                                  100,
+                                              decoration: BoxDecoration(
+                                                  color:
+                                                      const Color(0xff231E54),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          9.37)),
+                                              child: const TextButton(
+                                                onPressed: null,
+                                                child: Center(
+                                                  child: Text(
+                                                    'Start Investing',
+                                                    style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 6.56,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
                             ),
                           ),
                         ],
@@ -684,187 +913,217 @@ class _MainScreenState extends State<MainScreen>
                     //tablet size
                     else {
                       return Row(children: [
-                        Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20)),
+                        SizedBox(
                           width: ((myWidth - 20) / 2) - 5,
                           height: (((myWidth - 20) / 2) - 5) / 2.597,
-                          child: Stack(
-                            children: [
-                              Image.asset(
-                                'assets/images/lastcard1.png',
-                                width: ((myWidth - 20) / 2) - 5,
-                                height: (((myWidth - 20) / 2) - 5) / 2.597,
-                                fit: BoxFit.fitWidth,
-                                filterQuality: FilterQuality.high,
-                              ),
-                              SizedBox(
-                                width: (((myWidth - 20) / 2) - 5) * 70 / 100,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        height: ((((myWidth - 20) / 2) - 5) /
-                                                2.597) *
-                                            55 /
-                                            100,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Obtain loans that are tailored to your needs',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12.56,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            SizedBox(
-                                              width:
-                                                  (((myWidth - 20) / 2) - 5) *
+                          child: TextButton(
+                            onPressed: _launchURL,
+                            style:
+                                TextButton.styleFrom(padding: EdgeInsets.zero),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20)),
+                              width: ((myWidth - 20) / 2) - 5,
+                              height: (((myWidth - 20) / 2) - 5) / 2.597,
+                              child: Stack(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/lastcard1.png',
+                                    width: ((myWidth - 20) / 2) - 5,
+                                    height: (((myWidth - 20) / 2) - 5) / 2.597,
+                                    fit: BoxFit.fitWidth,
+                                    filterQuality: FilterQuality.high,
+                                  ),
+                                  SizedBox(
+                                    width:
+                                        (((myWidth - 20) / 2) - 5) * 70 / 100,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height:
+                                                ((((myWidth - 20) / 2) - 5) /
+                                                        2.597) *
+                                                    55 /
+                                                    100,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Obtain loans that are tailored to your needs',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12.56,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                SizedBox(
+                                                  width: (((myWidth - 20) / 2) -
+                                                          5) *
                                                       45 /
                                                       100,
-                                              child: const Text(
-                                                'Our loan service provides  you with the best loans.',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 8.5,
-                                                    fontWeight:
-                                                        FontWeight.w200),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: (((((myWidth - 20) / 2) - 5) /
-                                                    2.597) *
-                                                20 /
-                                                100) *
-                                            2.959,
-                                        height: ((((myWidth - 20) / 2) - 5) /
-                                                2.597) *
-                                            20 /
-                                            100,
-                                        decoration: BoxDecoration(
-                                            color: const Color(0xff231E54),
-                                            borderRadius:
-                                                BorderRadius.circular(9.37)),
-                                        child: const TextButton(
-                                          onPressed: null,
-                                          child: Center(
-                                            child: Text(
-                                              'Apply Now',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 6.56,
-                                              ),
+                                                  child: const Text(
+                                                    'Our loan service provides  you with the best loans.',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 8.5,
+                                                        fontWeight:
+                                                            FontWeight.w200),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ],
+                                          Container(
+                                            width:
+                                                (((((myWidth - 20) / 2) - 5) /
+                                                            2.597) *
+                                                        20 /
+                                                        100) *
+                                                    2.959,
+                                            height:
+                                                ((((myWidth - 20) / 2) - 5) /
+                                                        2.597) *
+                                                    20 /
+                                                    100,
+                                            decoration: BoxDecoration(
+                                                color: const Color(0xff231E54),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        9.37)),
+                                            child: const TextButton(
+                                              onPressed: null,
+                                              child: Center(
+                                                child: Text(
+                                                  'Apply Now',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 6.56,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(
                           width: 10,
                         ),
-                        Container(
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20)),
+                        SizedBox(
                           width: ((myWidth - 20) / 2) - 5,
                           height: (((myWidth - 20) / 2) - 5) / 2.597,
-                          child: Stack(
-                            children: [
-                              Image.asset(
-                                'assets/images/lastcard2.png',
-                                width: ((myWidth - 20) / 2) - 5,
-                                height: (((myWidth - 20) / 2) - 5) / 2.597,
-                                fit: BoxFit.fitWidth,
-                                filterQuality: FilterQuality.high,
-                              ),
-                              SizedBox(
-                                width: (((myWidth - 20) / 2) - 5) * 75 / 100,
-                                child: Padding(
-                                  padding: const EdgeInsets.all(15.0),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      SizedBox(
-                                        height: ((((myWidth - 20) / 2) - 5) /
-                                                2.597) *
-                                            55 /
-                                            100,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Grow and monitor your wealth with our Investment account',
-                                              style: TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12.56,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            const SizedBox(height: 5),
-                                            SizedBox(
-                                              width:
-                                                  (((myWidth - 20) / 2) - 5) *
+                          child: TextButton(
+                            onPressed: _launchURL2,
+                            style:
+                                TextButton.styleFrom(padding: EdgeInsets.zero),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20)),
+                              width: ((myWidth - 20) / 2) - 5,
+                              height: (((myWidth - 20) / 2) - 5) / 2.597,
+                              child: Stack(
+                                children: [
+                                  Image.asset(
+                                    'assets/images/lastcard2.png',
+                                    width: ((myWidth - 20) / 2) - 5,
+                                    height: (((myWidth - 20) / 2) - 5) / 2.597,
+                                    fit: BoxFit.fitWidth,
+                                    filterQuality: FilterQuality.high,
+                                  ),
+                                  SizedBox(
+                                    width:
+                                        (((myWidth - 20) / 2) - 5) * 75 / 100,
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(15.0),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          SizedBox(
+                                            height:
+                                                ((((myWidth - 20) / 2) - 5) /
+                                                        2.597) *
+                                                    55 /
+                                                    100,
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                const Text(
+                                                  'Grow and monitor your wealth with our Investment account',
+                                                  style: TextStyle(
+                                                      color: Colors.white,
+                                                      fontSize: 12.56,
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const SizedBox(height: 5),
+                                                SizedBox(
+                                                  width: (((myWidth - 20) / 2) -
+                                                          5) *
                                                       45 /
                                                       100,
-                                              child: const Text(
-                                                'EA provides you with a portfolio for growing your wealth.',
-                                                style: TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 8.5,
-                                                    fontWeight:
-                                                        FontWeight.w200),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Container(
-                                        width: (((((myWidth - 20) / 2) - 5) /
-                                                    2.597) *
-                                                20 /
-                                                100) *
-                                            2.959,
-                                        height: ((((myWidth - 20) / 2) - 5) /
-                                                2.597) *
-                                            20 /
-                                            100,
-                                        decoration: BoxDecoration(
-                                            color: const Color(0xff231E54),
-                                            borderRadius:
-                                                BorderRadius.circular(9.37)),
-                                        child: const TextButton(
-                                          onPressed: null,
-                                          child: Center(
-                                            child: Text(
-                                              'Start Investing',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 6.56,
-                                              ),
+                                                  child: const Text(
+                                                    'EA provides you with a portfolio for growing your wealth.',
+                                                    style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 8.5,
+                                                        fontWeight:
+                                                            FontWeight.w200),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              )
-                            ],
+                                          Container(
+                                            width:
+                                                (((((myWidth - 20) / 2) - 5) /
+                                                            2.597) *
+                                                        20 /
+                                                        100) *
+                                                    2.959,
+                                            height:
+                                                ((((myWidth - 20) / 2) - 5) /
+                                                        2.597) *
+                                                    20 /
+                                                    100,
+                                            decoration: BoxDecoration(
+                                                color: const Color(0xff231E54),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                        9.37)),
+                                            child: const TextButton(
+                                              onPressed: null,
+                                              child: Center(
+                                                child: Text(
+                                                  'Start Investing',
+                                                  style: TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 6.56,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
                         ),
                       ]);
@@ -874,316 +1133,468 @@ class _MainScreenState extends State<MainScreen>
                   //top card widget
                   Widget Topcard() {
                     if (myWidth <= 767) {
+                      cardheight = ((myWidth - 40) / 2.33333) + 154;
+                      List<Widget> savingschild() {
+                        if (saving['id'] != null) {
+                          List<Widget> ret = [
+                            SvgPicture.asset(
+                              'assets/svg/homeicon2.svg',
+                              height: myWidth / 13,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text('Savings Account',
+                                style: TextStyle(
+                                  fontSize: subfontwidth2,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400,
+                                )),
+                            SizedBox(
+                              height: myWidth / 39,
+                            ),
+                            Text(
+                              'Balance',
+                              style: TextStyle(
+                                fontSize: subfontwidth - 0.5,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                            SizedBox(
+                              height: myWidth / 78,
+                            ),
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/naira.svg',
+                                  height: subfontwidth2 + (subfontwidth2 / 2),
+                                  width: subfontwidth2 + (subfontwidth2 / 2),
+                                ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(
+                                  humanizeNo(saving['balance']),
+                                  style: TextStyle(
+                                    fontSize:
+                                        subfontwidth2 + (subfontwidth2 / 2.5),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            )
+                          ];
+                          return (ret);
+                        } else {
+                          List<Widget> ret = [
+                            SvgPicture.asset(
+                              'assets/svg/homeicon2.svg',
+                              height: myWidth / 13,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'You do not have a savings account with Elevate Alliance',
+                              style: TextStyle(
+                                fontSize: subfontwidth2,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                          ];
+                          return (ret);
+                        }
+                      }
+
+                      List<Widget> investchild() {
+                        if (investA == 'true') {
+                          double mainport = 0;
+                          for (var invest in invests) {
+                            mainport += invest['balance'];
+                          }
+                          List<Widget> ret = [
+                            SvgPicture.asset('assets/svg/homeicon3.svg'),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text('Investment Account',
+                                style: TextStyle(
+                                  fontSize: subfontwidth2,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400,
+                                )),
+                            SizedBox(
+                              height: myWidth / 39,
+                            ),
+                            Text(
+                              'Total Assets',
+                              style: TextStyle(
+                                fontSize: subfontwidth - 0.5,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                            SizedBox(
+                              height: myWidth / 78,
+                            ),
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/naira.svg',
+                                  height: subfontwidth2 + (subfontwidth2 / 2),
+                                  width: subfontwidth2 + (subfontwidth2 / 2),
+                                ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(
+                                  humanizeNo(mainport),
+                                  style: TextStyle(
+                                    fontSize:
+                                        subfontwidth2 + (subfontwidth2 / 2.5),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            )
+                          ];
+                          return (ret);
+                        } else {
+                          List<Widget> ret = [
+                            SvgPicture.asset(
+                              'assets/svg/homeicon3.svg',
+                              height: myWidth / 13,
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'You do not have an invesment account with Elevate Alliance',
+                              style: TextStyle(
+                                fontSize: subfontwidth2,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                          ];
+                          return (ret);
+                        }
+                      }
+
+                      Widget noloancard(int idx) {
+                        if (idx == 0) {
+                          return (Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 0.6,
+                                      color: const Color(0xff575A96),
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xff37396C),
+                                        Color(0xff191C61),
+                                        Color(0xff15196A)
+                                      ],
+                                    )),
+                                width: myWidth - 40,
+                                height: (myWidth - 40) / 2.33333,
+                                child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        30, 15, 30, 15),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/homeicon1.svg'),
+                                        const SizedBox(
+                                          height: 5,
+                                        ),
+                                        const Text('No Active Loans',
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w400,
+                                            )),
+                                        const SizedBox(
+                                          height: 2,
+                                        ),
+                                        Text(
+                                          'Explore through our loan products and\nstand a chance to get\napproved!!',
+                                          style: TextStyle(
+                                            fontSize: subfontwidth,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w200,
+                                          ),
+                                        )
+                                      ],
+                                    ))),
+                          ));
+                        } else if (idx == 1) {
+                          return (Padding(
+                            padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 0.6,
+                                      color: const Color(0xff579668),
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xff1A7252),
+                                        Color(0xff025333),
+                                        Color(0xff085E3F)
+                                      ],
+                                    )),
+                                width: myWidth - 40,
+                                height: (myWidth - 40) / 2.33333,
+                                child: Padding(
+                                    padding: EdgeInsets.fromLTRB(
+                                        subfontwidth2 * 2,
+                                        subfontwidth2,
+                                        subfontwidth2 * 2,
+                                        subfontwidth2),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: savingschild(),
+                                    ))),
+                          ));
+                        } else {
+                          return (Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+                            child: Container(
+                                decoration: BoxDecoration(
+                                    border: Border.all(
+                                      width: 0.6,
+                                      color: const Color(0xff955796),
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [
+                                        Color(0xff65376C),
+                                        Color(0xff531961),
+                                        Color(0xff69156A)
+                                      ],
+                                    )),
+                                width: myWidth - 40,
+                                height: (myWidth - 40) / 2.33333,
+                                child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(
+                                        30, 18, 30, 18),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: investchild(),
+                                    ))),
+                          ));
+                        }
+                      }
+
                       return SizedBox(
                         width: myWidth - 20,
-                        height: (myWidth - 40) / 2.33333,
+                        height: ((myWidth - 40) / 2.33333),
                         //notifocation listener for first bounce scroll
                         child: NotificationListener<ScrollNotification>(
                           onNotification: (ScrollNotification) {
-                            double scrollwidth =
-                                ScrollNotification.metrics.maxScrollExtent;
-                            double scrollInitial =
-                                ScrollNotification.metrics.pixels;
-                            //if scrolling to right
-                            if (ScrollNotification.metrics.pixels >
-                                homecardpos + 50) {
-                              //scroll to 2
-                              if (scrollInitial > 0 &&
-                                  scrollInitial <= (myWidth - 40)) {
-                                Timer(
-                                    const Duration(milliseconds: 70),
-                                    () => myhomecardcontroller.animateTo(
-                                        (myWidth - 40),
-                                        duration:
-                                            const Duration(milliseconds: 70),
-                                        curve: Curves.easeIn));
-                                if (scrollInitial == myWidth - 40) {
-                                  setState(() {
-                                    homecardpos = myWidth - 40;
-                                    homecardindex = 2;
-                                  });
-                                }
-                              } //scroll to 3
-                              else if (scrollInitial >= (myWidth - 40) + 20) {
-                                Timer(
-                                    const Duration(milliseconds: 70),
-                                    () => myhomecardcontroller.animateTo(
-                                        ((myWidth - 40) * 2) + 10,
-                                        duration:
-                                            const Duration(milliseconds: 70),
-                                        curve: Curves.easeIn));
-                                if (scrollInitial ==
-                                    ((myWidth - 40) * 2) + 10) {
-                                  setState(() {
-                                    homecardpos = ((myWidth - 40) * 2) + 10;
-                                    homecardindex = 3;
-                                  });
-                                }
-                              }
-                            }
-                            //if scrolling to left
-                            else if (ScrollNotification.metrics.pixels <
-                                homecardpos) {
-                              //scroll to 2
-                              if (scrollInitial < (((myWidth - 40) * 2) + 10) &&
-                                  scrollInitial >= (myWidth - 40) - 10) {
-                                print(scrollInitial);
-                                Timer(
-                                    const Duration(milliseconds: 70),
-                                    () => myhomecardcontroller.animateTo(
-                                        (myWidth - 40),
-                                        duration:
-                                            const Duration(milliseconds: 70),
-                                        curve: Curves.easeIn));
-                                if (scrollInitial == myWidth - 40) {
-                                  setState(() {
-                                    homecardpos = myWidth - 40;
-                                    homecardindex = 2;
-                                  });
-                                }
-                              } //scroll to 1
-                              else if (scrollInitial <= (myWidth - 40) - 20) {
-                                Timer(
-                                    const Duration(milliseconds: 70),
-                                    () => myhomecardcontroller.animateTo(0,
-                                        duration:
-                                            const Duration(milliseconds: 70),
-                                        curve: Curves.easeIn));
-                                if (scrollInitial == 0) {
-                                  setState(() {
-                                    homecardpos = 0.0;
-                                    homecardindex = 1;
-                                  });
-                                }
-                              }
+                            if ((ScrollNotification.metrics.extentBefore) +
+                                    (myWidth / 2) <=
+                                ScrollNotification.metrics.extentTotal / 3) {
+                              setState(() {
+                                homecardindex = 1;
+                              });
+                            } else if (ScrollNotification.metrics.extentBefore >
+                                    (ScrollNotification.metrics.extentTotal /
+                                            3) +
+                                        (myWidth / 2) &&
+                                ScrollNotification.metrics.extentAfter <
+                                    (ScrollNotification.metrics.extentTotal /
+                                            3) -
+                                        (myWidth / 2)) {
+                              setState(() {
+                                homecardindex = 3;
+                              });
+                            } else {
+                              setState(() {
+                                homecardindex = 2;
+                              });
                             }
                             return true;
                           },
-                          child: ListView(
-                            controller: myhomecardcontroller,
+                          child: ScrollablePositionedList.builder(
+                            itemCount: 3,
+                            itemScrollController: myhomecardcontroller,
+                            itemPositionsListener: myhomecardcontrollerlis,
                             scrollDirection: Axis.horizontal,
-                            dragStartBehavior: DragStartBehavior.down,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width: 0.6,
-                                          color: const Color(0xff575A96),
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Color(0xff37396C),
-                                            Color(0xff191C61),
-                                            Color(0xff15196A)
-                                          ],
-                                        )),
-                                    width: myWidth - 40,
-                                    height: (myWidth - 40) / 2.33333,
-                                    child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            30, 15, 30, 15),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SvgPicture.asset(
-                                                'assets/svg/homeicon1.svg'),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            const Text('No Active Loans',
-                                                style: TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w400,
-                                                )),
-                                            const SizedBox(
-                                              height: 2,
-                                            ),
-                                            Text(
-                                              'Explore through our loan products and\nstand a chance to get\napproved!!',
-                                              style: TextStyle(
-                                                fontSize: subfontwidth,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w200,
-                                              ),
-                                            )
-                                          ],
-                                        ))),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width: 0.6,
-                                          color: const Color(0xff579668),
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Color(0xff1A7252),
-                                            Color(0xff025333),
-                                            Color(0xff085E3F)
-                                          ],
-                                        )),
-                                    width: myWidth - 40,
-                                    height: (myWidth - 40) / 2.33333,
-                                    child: Padding(
-                                        padding: EdgeInsets.fromLTRB(
-                                            subfontwidth2 * 2,
-                                            subfontwidth2,
-                                            subfontwidth2 * 2,
-                                            subfontwidth2),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SvgPicture.asset(
-                                              'assets/svg/homeicon2.svg',
-                                              height: myWidth / 13,
-                                            ),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            Text('Savings Account',
-                                                style: TextStyle(
-                                                  fontSize: subfontwidth2,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w400,
-                                                )),
-                                            SizedBox(
-                                              height: myWidth / 39,
-                                            ),
-                                            Text(
-                                              'Balance',
-                                              style: TextStyle(
-                                                fontSize: subfontwidth - 0.5,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w200,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: myWidth / 78,
-                                            ),
-                                            Row(
-                                              children: [
-                                                SvgPicture.asset(
-                                                  'assets/svg/naira.svg',
-                                                  height: subfontwidth2 +
-                                                      (subfontwidth2 / 2),
-                                                  width: subfontwidth2 +
-                                                      (subfontwidth2 / 2),
-                                                ),
-                                                const SizedBox(
-                                                  width: 7,
-                                                ),
-                                                Text(
-                                                  '200,000',
-                                                  style: TextStyle(
-                                                    fontSize: subfontwidth2 +
-                                                        (subfontwidth2 / 2.5),
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        ))),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                                child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width: 0.6,
-                                          color: const Color(0xff955796),
-                                        ),
-                                        borderRadius: BorderRadius.circular(20),
-                                        gradient: const LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Color(0xff65376C),
-                                            Color(0xff531961),
-                                            Color(0xff69156A)
-                                          ],
-                                        )),
-                                    width: myWidth - 40,
-                                    height: (myWidth - 40) / 2.33333,
-                                    child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            30, 18, 30, 18),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SvgPicture.asset(
-                                                'assets/svg/homeicon3.svg'),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            Text('Investment Account',
-                                                style: TextStyle(
-                                                  fontSize: subfontwidth2,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.w400,
-                                                )),
-                                            SizedBox(
-                                              height: myWidth / 39,
-                                            ),
-                                            Text(
-                                              'Total Assets',
-                                              style: TextStyle(
-                                                fontSize: subfontwidth - 0.5,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w200,
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              height: myWidth / 78,
-                                            ),
-                                            Row(
-                                              children: [
-                                                SvgPicture.asset(
-                                                  'assets/svg/naira.svg',
-                                                  height: subfontwidth2 +
-                                                      (subfontwidth2 / 2),
-                                                  width: subfontwidth2 +
-                                                      (subfontwidth2 / 2),
-                                                ),
-                                                const SizedBox(
-                                                  width: 7,
-                                                ),
-                                                Text(
-                                                  '200,000',
-                                                  style: TextStyle(
-                                                    fontSize: subfontwidth2 +
-                                                        (subfontwidth2 / 2.5),
-                                                    color: Colors.white,
-                                                    fontWeight: FontWeight.bold,
-                                                  ),
-                                                )
-                                              ],
-                                            )
-                                          ],
-                                        ))),
-                              ),
-                            ],
+                            itemBuilder: (context, index) {
+                              return noloancard(index);
+                            },
                           ),
                         ),
                       );
                     } //for tablet size
                     else {
+                      cardheight = ((((myWidth - 40) / 2) / 2.33333)) + 125;
+                      List<Widget> savingschild() {
+                        if (saving['id'] != null) {
+                          List<Widget> ret = [
+                            SvgPicture.asset(
+                              'assets/svg/homeicon2.svg',
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text('Savings Account',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400,
+                                )),
+                            SizedBox(
+                              height: 2,
+                            ),
+                            Text(
+                              'Balance',
+                              style: TextStyle(
+                                fontSize: subfontwidth - 0.5,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/naira.svg',
+                                  height: 22,
+                                  width: 22,
+                                ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(
+                                  humanizeNo(saving['balance']),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            )
+                          ];
+                          return (ret);
+                        } else {
+                          List<Widget> ret = [
+                            SvgPicture.asset(
+                              'assets/svg/homeicon2.svg',
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'You do not have a savings account with Elevate Alliance',
+                              style: TextStyle(
+                                fontSize: subfontwidth + 4,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                          ];
+                          return (ret);
+                        }
+                      }
+
+                      List<Widget> investchild() {
+                        if (investA == 'true') {
+                          double mainport = 0;
+                          for (var invest in invests) {
+                            mainport += invest['balance'];
+                          }
+                          List<Widget> ret = [
+                            SvgPicture.asset('assets/svg/homeicon3.svg'),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text('Investment Account',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w400,
+                                )),
+                            SizedBox(
+                              height: 2,
+                            ),
+                            Text(
+                              'Total Assets',
+                              style: TextStyle(
+                                fontSize: subfontwidth - 0.5,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/naira.svg',
+                                  height: 22,
+                                  width: 22,
+                                ),
+                                const SizedBox(
+                                  width: 7,
+                                ),
+                                Text(
+                                  humanizeNo(mainport),
+                                  style: TextStyle(
+                                    fontSize: 20,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            )
+                          ];
+                          return (ret);
+                        } else {
+                          List<Widget> ret = [
+                            SvgPicture.asset(
+                              'assets/svg/homeicon3.svg',
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Text(
+                              'You do not have an invesment account with Elevate Alliance',
+                              style: TextStyle(
+                                fontSize: subfontwidth + 4,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w200,
+                              ),
+                            ),
+                          ];
+                          return (ret);
+                        }
+                      }
+
                       return SizedBox(
                         width: myWidth - 20,
                         height: (((myWidth - 40) / 2) / 2.33333),
@@ -1268,54 +1679,7 @@ class _MainScreenState extends State<MainScreen>
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                            'assets/svg/homeicon2.svg',
-                                          ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text('Savings Account',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w400,
-                                              )),
-                                          SizedBox(
-                                            height: 2,
-                                          ),
-                                          Text(
-                                            'Balance',
-                                            style: TextStyle(
-                                              fontSize: subfontwidth - 0.5,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w200,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            children: [
-                                              SvgPicture.asset(
-                                                'assets/svg/naira.svg',
-                                                height: 22,
-                                                width: 22,
-                                              ),
-                                              const SizedBox(
-                                                width: 7,
-                                              ),
-                                              Text(
-                                                '200,000',
-                                                style: TextStyle(
-                                                  fontSize: 20,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              )
-                                            ],
-                                          )
-                                        ],
+                                        children: savingschild(),
                                       ))),
                             ),
                             Padding(
@@ -1344,53 +1708,7 @@ class _MainScreenState extends State<MainScreen>
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
-                                        children: [
-                                          SvgPicture.asset(
-                                              'assets/svg/homeicon3.svg'),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Text('Investment Account',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w400,
-                                              )),
-                                          SizedBox(
-                                            height: 2,
-                                          ),
-                                          Text(
-                                            'Total Assets',
-                                            style: TextStyle(
-                                              fontSize: subfontwidth - 0.5,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w200,
-                                            ),
-                                          ),
-                                          SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            children: [
-                                              SvgPicture.asset(
-                                                'assets/svg/naira.svg',
-                                                height: 22,
-                                                width: 22,
-                                              ),
-                                              const SizedBox(
-                                                width: 7,
-                                              ),
-                                              Text(
-                                                '200,000',
-                                                style: TextStyle(
-                                                  fontSize: 20,
-                                                  color: Colors.white,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
-                                              )
-                                            ],
-                                          )
-                                        ],
+                                        children: investchild(),
                                       ))),
                             ),
                           ],
@@ -1402,10 +1720,9 @@ class _MainScreenState extends State<MainScreen>
                   //card index ends
                   //scaffold body starts here
                   return Container(
-                    color: mode.background3,
                     child: RefreshIndicator(
                       displacement: 50,
-                      onRefresh: regetdata,
+                      onRefresh: regetdata3,
                       child: SingleChildScrollView(
                         physics: AlwaysScrollableScrollPhysics(),
                         child: Container(
@@ -1416,98 +1733,91 @@ class _MainScreenState extends State<MainScreen>
                           ),
                           child: Padding(
                             padding: const EdgeInsets.all(10.0),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const SizedBox(
-                                    height: 40,
-                                  ),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            hello,
-                                            style: TextStyle(
-                                                color: mode.brightText1,
-                                                fontSize: 15,
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          const SizedBox(
-                                            height: 2.5,
-                                          ),
-                                          //redundant greeting text
-                                          Text(
-                                            'Good morning',
-                                            style: TextStyle(
-                                                color: mode.brightText1,
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.w300),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(
-                                        height: 40,
-                                        width: 40,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(45),
-                                          child: Image.network(imageurl,
-                                              alignment: Alignment.center,
-                                              filterQuality:
-                                                  FilterQuality.medium),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const SizedBox(
+                                  height: 40,
+                                ),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          hello,
+                                          style: TextStyle(
+                                              color: mode.brightText1,
+                                              fontSize: 15,
+                                              fontWeight: FontWeight.bold),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 10),
-                                  //top card for cards
-                                  Topcard(),
-                                  // index of cards
-                                  realCardIndex(),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  Container(
-                                    child: Text(
-                                      'Loan Products',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: mode.brightText1,
-                                      ),
+                                        const SizedBox(
+                                          height: 2.5,
+                                        ),
+                                        //redundant greeting text
+                                        Text(
+                                          'Good morning',
+                                          style: TextStyle(
+                                              color: mode.brightText1,
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w300),
+                                        ),
+                                      ],
                                     ),
-                                  ),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  //container for cards
-                                  LoanProducts(),
-                                  const SizedBox(
-                                    height: 10,
-                                  ),
-                                  Container(
-                                    child: Text(
-                                      'EA Services',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        color: mode.brightText1,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(
-                                    height: 15,
-                                  ),
-                                  EaServices(),
-                                  const SizedBox(
-                                    height: 20,
-                                  )
-                                ],
-                              ),
+                                    imagecon2()
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                                //top card for cards
+                                Topcard(),
+                                // index of cards
+                                realCardIndex(),
+                                const SizedBox(
+                                  height: 15,
+                                ),
+                                Container(
+                                    height: myHeight - cardheight,
+                                    child: ListView(
+                                      children: [
+                                        Container(
+                                          child: Text(
+                                            'Loan Products',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: mode.brightText1,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        //container for cards
+                                        LoanProducts(),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Container(
+                                          child: Text(
+                                            'EA Services',
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: mode.brightText1,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 15,
+                                        ),
+                                        EaServices(),
+                                        const SizedBox(
+                                          height: 20,
+                                        )
+                                      ],
+                                    )),
+                              ],
                             ),
                           ),
                         ),
@@ -1526,7 +1836,7 @@ class _MainScreenState extends State<MainScreen>
               String outbal = humanizeNo(loan['balance']);
               String outbalance = humanizeNo(loan['balance']);
               String ins = humanizeNo(loan['total_loan'] / loan['tenure']);
-    
+
               String installment = ins.toString();
               double paidd = 0;
               for (var ins in installments) {
@@ -1684,10 +1994,11 @@ class _MainScreenState extends State<MainScreen>
                           width: 133.3,
                           height: 35.2,
                           child: TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 setState(() {
                                   _index = 1;
                                 });
+                                await getelevatebank();
                               },
                               child: Padding(
                                 padding:
@@ -1736,10 +2047,11 @@ class _MainScreenState extends State<MainScreen>
                           width: (myWidth - 30) / 2,
                           height: 42.2,
                           child: TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 setState(() {
                                   _index = 1;
                                 });
+                                await getelevatebank();
                               },
                               child: Padding(
                                 padding:
@@ -1951,13 +2263,64 @@ class _MainScreenState extends State<MainScreen>
                     );
                   }
 
+                  Widget loantitle() {
+                    if (officer['email'] == null) {
+                      return Container();
+                    }
+                    return Container(
+                      child: Text(
+                        'Loan Officer',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: mode.brightText1,
+                        ),
+                      ),
+                    );
+                  }
+
                   Widget loanoffwid() {
+                    if (officer['email'] == null) {
+                      return Container();
+                    }
                     double loanoffwidth = 0;
                     if (myWidth < 768) {
                       loanoffwidth = myWidth - 20;
                     } else {
                       loanoffwidth = ((myWidth - 20) / 2) - 10;
                     }
+
+                    Widget imagecon() {
+                      if (officer['image'] == '' || officer['image'] == null) {
+                        return Container(
+                          height: 50,
+                          width: 50,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(50),
+                            child: Image.asset(
+                              'assets/images/default_pic.png',
+                              width: 50,
+                              cacheHeight: 100,
+                              cacheWidth: 100,
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Container(
+                          height: 50,
+                          width: 50,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(42),
+                            child: Image.network(
+                              officer['image'],
+                              width: 50,
+                              cacheHeight: 100,
+                              cacheWidth: 100,
+                            ),
+                          ),
+                        );
+                      }
+                    }
+
                     return Container(
                       width: loanoffwidth,
                       child: Column(children: [
@@ -1974,20 +2337,12 @@ class _MainScreenState extends State<MainScreen>
                                   children: [
                                     Row(
                                       children: [
-                                        Container(
-                                          height: 50,
-                                          width: 50,
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xffD9D9D9),
-                                            borderRadius:
-                                                BorderRadius.circular(50),
-                                          ),
-                                        ),
+                                        imagecon(),
                                         const SizedBox(
                                           width: 20,
                                         ),
                                         Text(
-                                          'Philip Isaiah',
+                                          officer['name'] ?? '',
                                           style: TextStyle(
                                               fontSize: 12,
                                               color: mode.brightText1,
@@ -2021,7 +2376,7 @@ class _MainScreenState extends State<MainScreen>
                                       width: (loanoffwidth - 40) / 2,
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: Text('isaiahphil97@gmail.com',
+                                        child: Text(officer['email'] ?? '',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: mode.brightText1)),
@@ -2045,7 +2400,8 @@ class _MainScreenState extends State<MainScreen>
                                       width: (loanoffwidth - 40) / 2,
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: Text('08123456789',
+                                        child: Text(
+                                            officer['phone_number'] ?? '',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: mode.brightText1)),
@@ -2069,7 +2425,8 @@ class _MainScreenState extends State<MainScreen>
                                       width: (loanoffwidth - 40) / 2,
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: Text('08123456789',
+                                        child: Text(
+                                            officer['whatsapp_number'] ?? '',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: mode.brightText1)),
@@ -2148,6 +2505,9 @@ class _MainScreenState extends State<MainScreen>
                   }
 
                   Widget reswid() {
+                    if (elevatebank[0] == '') {
+                      return Container();
+                    }
                     double reswidth = 0;
                     if (myWidth < 768) {
                       reswidth = myWidth - 20;
@@ -2178,7 +2538,7 @@ class _MainScreenState extends State<MainScreen>
                                       width: (reswidth - 40) / 2,
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: Text('0123456789',
+                                        child: Text(elevatebank[0] ?? '',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: mode.brightText1)),
@@ -2200,7 +2560,7 @@ class _MainScreenState extends State<MainScreen>
                                       width: (reswidth - 40) / 2,
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: Text('Isaiah Matthew',
+                                        child: Text(elevatebank[1] ?? '',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: mode.brightText1)),
@@ -2222,7 +2582,29 @@ class _MainScreenState extends State<MainScreen>
                                       width: (reswidth - 40) / 2,
                                       child: Align(
                                         alignment: Alignment.centerRight,
-                                        child: Text('GT Bank',
+                                        child: Text(elevatebank[2] ?? '',
+                                            style: TextStyle(
+                                                fontSize: 11,
+                                                color: mode.brightText1)),
+                                      ),
+                                    ),
+                                  ]),
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  Row(children: [
+                                    SizedBox(
+                                      width: (reswidth - 40) / 2,
+                                      child: Text('Reference:',
+                                          style: TextStyle(
+                                              fontSize: 11,
+                                              color: mode.brightText1)),
+                                    ),
+                                    SizedBox(
+                                      width: (reswidth - 40) / 2,
+                                      child: Align(
+                                        alignment: Alignment.centerRight,
+                                        child: Text(elevatebank[3] ?? '',
                                             style: TextStyle(
                                                 fontSize: 11,
                                                 color: mode.brightText1)),
@@ -2288,8 +2670,12 @@ class _MainScreenState extends State<MainScreen>
                     double conheight = 0;
                     double conheight2 = 0;
                     if (myWidth < 768) {
-                      conheight = myHeight - ((myWidth - 20) / 2.263) - 188;
-                      conheight2 = myHeight - ((myWidth - 20) / 2.263) - 178;
+                      conheight = myHeight - ((myWidth - 20) / 2.263) - 173;
+                      conheight2 = myHeight - ((myWidth - 20) / 2.263) - 173;
+                      if (myHeight < 580) {
+                        conheight = myHeight - (100) - 173;
+                        conheight2 = myHeight - (100) - 173;
+                      }
                     } else {
                       conheight = myHeight - 327;
                       conheight2 = myHeight - 327;
@@ -2332,15 +2718,7 @@ class _MainScreenState extends State<MainScreen>
                               const SizedBox(
                                 height: 10,
                               ),
-                              Container(
-                                child: Text(
-                                  'Loan Officer',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: mode.brightText1,
-                                  ),
-                                ),
-                              ),
+                              loantitle(),
                               const SizedBox(
                                 height: 10,
                               ),
@@ -2385,16 +2763,7 @@ class _MainScreenState extends State<MainScreen>
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Container(
-                                                      child: Text(
-                                                        'Loan Officer',
-                                                        style: TextStyle(
-                                                          fontSize: 15,
-                                                          color:
-                                                              mode.brightText1,
-                                                        ),
-                                                      ),
-                                                    ),
+                                                    loantitle(),
                                                     const SizedBox(
                                                       height: 10,
                                                     ),
@@ -2528,7 +2897,7 @@ class _MainScreenState extends State<MainScreen>
                   }
 
                   Widget TopCard() {
-                    if (myWidth < 768) {
+                    if (myWidth < 768 && myHeight > 580) {
                       return (Padding(
                           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                           child: Container(
@@ -2734,11 +3103,47 @@ class _MainScreenState extends State<MainScreen>
                           )));
                     } //for tablets
                     else {
+                      double cardheight = 140;
+                      double height42 = 42;
+                      double font20 = 20;
+                      double font30 = 30;
+                      double height50 = 50;
+                      double height20 = 20;
+                      double height17 = 17;
+                      double font13 = 13;
+                      double btnwidth = (((myWidth - 62) * 65 / 100) / 2) - 10;
+                      double btnrowwidth = (myWidth - 62) * 65 / 100;
+                      double outwidth = (myWidth - 62) * 35 / 100;
+                      if (myWidth < 767) {
+                        cardheight = 100;
+                        height42 = 21;
+                        font20 = 10;
+                        font30 = 15;
+                        height50 = 25;
+                        height20 = 10;
+                        height17 = 8.5;
+                        font13 = 7.5;
+                        btnrowwidth = 151.6;
+                        btnwidth = 151.6;
+                        outwidth = myWidth - 62 - 151.6;
+                      }
+                      Widget btnrow(List<Widget> children) {
+                        if (myWidth > 767) {
+                          return Row(
+                            children: children,
+                          );
+                        } else {
+                          return Column(
+                            children: children,
+                          );
+                        }
+                      }
+
                       return (Padding(
                         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: Container(
                           width: myWidth - 20,
-                          height: 140,
+                          height: cardheight,
                           decoration: BoxDecoration(
                               color: const Color(0xff121B20),
                               borderRadius: BorderRadius.circular(15),
@@ -2760,24 +3165,24 @@ class _MainScreenState extends State<MainScreen>
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
                                     Container(
-                                      width: (myWidth - 62) * 35 / 100,
+                                      width: outwidth,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
+                                          Text(
                                             'Outstanding Balance',
                                             style: TextStyle(
-                                                fontSize: 20,
+                                                fontSize: font20,
                                                 color: Color(0xffE7E8EE)),
                                           ),
                                           Row(
                                             children: [
                                               SvgPicture.asset(
                                                 'assets/svg/naira.svg',
-                                                height: 42,
+                                                height: height42,
                                               ),
                                               const SizedBox(
                                                 width: 7,
@@ -2785,7 +3190,7 @@ class _MainScreenState extends State<MainScreen>
                                               Text(
                                                 outbal,
                                                 style: TextStyle(
-                                                  fontSize: 30,
+                                                  fontSize: font30,
                                                   color: Color(0xffE7E8EE),
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -2796,15 +3201,12 @@ class _MainScreenState extends State<MainScreen>
                                       ),
                                     ),
                                     Container(
-                                      width: (myWidth - 62) * 65 / 100,
-                                      child: Row(
-                                        children: [
+                                      width: btnrowwidth,
+                                      child: btnrow(
+                                        [
                                           SizedBox(
-                                            height: 50,
-                                            width:
-                                                (((myWidth - 62) * 65 / 100) /
-                                                        2) -
-                                                    10,
+                                            height: height50,
+                                            width: btnwidth,
                                             child: Container(
                                               decoration: BoxDecoration(
                                                   color: const Color.fromARGB(
@@ -2830,7 +3232,7 @@ class _MainScreenState extends State<MainScreen>
                                                         Text(
                                                           'Interest Per Month:',
                                                           style: TextStyle(
-                                                              fontSize: 13,
+                                                              fontSize: font13,
                                                               color: const Color(
                                                                   0xffE7E8EE)),
                                                         ),
@@ -2850,14 +3252,16 @@ class _MainScreenState extends State<MainScreen>
                                                               child: SvgPicture
                                                                   .asset(
                                                                 'assets/svg/naira.svg',
-                                                                height: 17,
-                                                                width: 17,
+                                                                height:
+                                                                    height17,
+                                                                width: height17,
                                                               ),
                                                             ),
                                                             Text(
                                                               interestpm,
                                                               style: TextStyle(
-                                                                  fontSize: 13,
+                                                                  fontSize:
+                                                                      font13,
                                                                   color: const Color(
                                                                       0xffE7E8EE)),
                                                             ),
@@ -2871,14 +3275,12 @@ class _MainScreenState extends State<MainScreen>
                                             ),
                                           ),
                                           SizedBox(
-                                            width: 20,
+                                            width: height20,
+                                            height: 5,
                                           ),
                                           SizedBox(
-                                            height: 50,
-                                            width:
-                                                (((myWidth - 62) * 65 / 100) /
-                                                        2) -
-                                                    10,
+                                            height: height50,
+                                            width: btnwidth,
                                             child: Container(
                                               decoration: BoxDecoration(
                                                   color: const Color.fromARGB(
@@ -2904,7 +3306,7 @@ class _MainScreenState extends State<MainScreen>
                                                         Text(
                                                           'Monthly Installment:',
                                                           style: TextStyle(
-                                                              fontSize: 13,
+                                                              fontSize: font13,
                                                               color: const Color(
                                                                   0xffE0F5E9)),
                                                         ),
@@ -2924,14 +3326,16 @@ class _MainScreenState extends State<MainScreen>
                                                               child: SvgPicture
                                                                   .asset(
                                                                 'assets/svg/naira.svg',
-                                                                height: 17,
-                                                                width: 17,
+                                                                height:
+                                                                    height17,
+                                                                width: height17,
                                                               ),
                                                             ),
                                                             Text(
                                                               installment,
                                                               style: TextStyle(
-                                                                  fontSize: 13,
+                                                                  fontSize:
+                                                                      font13,
                                                                   color: const Color(
                                                                       0xffE0F5E9)),
                                                             ),
@@ -2956,12 +3360,12 @@ class _MainScreenState extends State<MainScreen>
                       ));
                     }
                   }
-    
+
                   //scaffold body starts here
                   return Container(
                     child: RefreshIndicator(
                       displacement: 50,
-                      onRefresh: regetdata,
+                      onRefresh: regetdata3,
                       child: SingleChildScrollView(
                         physics: AlwaysScrollableScrollPhysics(),
                         child: Container(
@@ -3010,18 +3414,7 @@ class _MainScreenState extends State<MainScreen>
                                           ],
                                         ),
                                       ),
-                                      SizedBox(
-                                        height: 37.8,
-                                        width: 37.8,
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(42),
-                                          child: Image.network(imageurl,
-                                              alignment: Alignment.center,
-                                              filterQuality:
-                                                  FilterQuality.medium),
-                                        ),
-                                      ),
+                                      imagecon3(),
                                     ],
                                   ),
                                 ),

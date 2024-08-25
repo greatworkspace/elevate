@@ -1,22 +1,13 @@
-import 'dart:ui';
+// ignore_for_file: unnecessary_null_comparison
+
 
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'models/color.dart';
-import 'overlay.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:select_form_field/select_form_field.dart';
 import 'models/databaseHelper.dart';
 import 'package:flutter/services.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
-import 'models/databaseHelper.dart';
 import 'models/user.dart';
-import 'dart:convert';
-import 'package:http/http.dart';
 
 const apiUrl = 'https://finx.ginnsltd.com/mobile/';
 
@@ -35,27 +26,7 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 class PersonalScreen extends StatefulWidget {
   @override
@@ -131,65 +102,6 @@ class _PersonalScreenState extends State<PersonalScreen>
 
   Widget build(BuildContext context) {
     bool inivalue;
-    Widget HideBalSwitch() {
-      if (hiddenbalCon.text == 'true') {
-        inivalue = true;
-      } else {
-        inivalue = false;
-      }
-      if (mode.name == 'Light') {
-        return Transform.scale(
-          scale: 0.9,
-          child: CupertinoSwitch(
-            value: inivalue,
-            onChanged: (value) async {
-              setState(() {
-                inivalue = value;
-              });
-              if (value == true) {
-                await DatabaseHelper.instance.sethide('true');
-                setState(() {
-                  hiddenbalCon.text = 'true';
-                });
-              } else {
-                await DatabaseHelper.instance.sethide('false');
-                setState(() {
-                  hiddenbalCon.text = 'false';
-                });
-              }
-            },
-            activeColor: Color(0xff46A623),
-            trackColor: Color(0xffD9D9D9),
-            thumbColor: mode.thumbColor,
-          ),
-        );
-      } else {
-        return Transform.scale(
-          scale: 0.9,
-          child: CupertinoSwitch(
-              value: inivalue,
-              onChanged: (value) async {
-                setState(() {
-                  inivalue = value;
-                });
-                if (value == true) {
-                  await DatabaseHelper.instance.sethide('true');
-                  setState(() {
-                    hiddenbalCon.text = 'true';
-                  });
-                } else {
-                  await DatabaseHelper.instance.sethide('false');
-                  setState(() {
-                    hiddenbalCon.text = 'false';
-                  });
-                }
-              },
-              activeColor: Color(0xff46A623),
-              trackColor: Color(0xffD9D9D9),
-              thumbColor: Colors.white),
-        );
-      }
-    }
 
     Future getUser() async {
       return (await DatabaseHelper.instance.getUser());
@@ -204,10 +116,21 @@ class _PersonalScreenState extends State<PersonalScreen>
                     (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
                   if (snapshot.hasData) {
                     User user = snapshot.data;
-                    String imageurl = 'assets/images/default_pic.png';
-                    if (user.image != '' || user.image != null) {
-                      imageurl = user.image;
+                     Widget imagecon() {
+                      String imageurl = 'assets/images/default_pic.png';
+                      if (user.image != '' || user.image != null) {
+                        imageurl = user.image;
+                        return Image.network(imageurl,
+                            alignment: Alignment.center,
+                            height: 70,
+                            cacheHeight: 140, cacheWidth: 140,);
+                      } else {
+                        return Image.asset(imageurl,
+                            alignment: Alignment.center,height: 70,
+                            cacheHeight: 140, cacheWidth: 140,);
+                      }
                     }
+
                     String name = user.firstname + ' ' + user.lastname;
                     String address = user.address ?? '';
                     String nationality = user.nationality ?? '';
@@ -436,7 +359,7 @@ class _PersonalScreenState extends State<PersonalScreen>
                                       width: 70,
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(75),
-                                        child: Image.network(imageurl,   alignment: Alignment.center, filterQuality: FilterQuality.high),
+                                        child: imagecon(),
                                       ),
                                     ),
                                     SizedBox(
@@ -462,7 +385,7 @@ class _PersonalScreenState extends State<PersonalScreen>
                               ),
                               Container(
                                 width: myWidth,
-                                height: myHeight - 228,
+                                height: myHeight - 232,
                                 child: ListView(
                                   children: [
                                     //first item

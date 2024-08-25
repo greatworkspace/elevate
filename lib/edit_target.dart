@@ -142,14 +142,13 @@ class _EditTargetState extends State<EditTarget>
         setState(() {
           OverCon = Correctpin;
         });
-        regetdata();
+        regetdata(context, mode);
       } else {
         setState(() {
           OverCon = Failedtrans;
         });
       }
     } else {
-      print(res2.statusCode);
       setState(() {
         OverCon = Failedtrans;
       });
@@ -199,8 +198,6 @@ class _EditTargetState extends State<EditTarget>
     return Scaffold(
         backgroundColor: mode.background1,
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
-          final myHeight = constraints.maxHeight;
-          final myWidth = constraints.maxWidth;
           // creating custom widgets
 
           loading = Scaffold(body:

@@ -1,4 +1,4 @@
-// ignore_for_file: library_private_types_in_public_api, override_on_non_overriding_member, non_constant_identifier_names
+// ignore_for_file: library_private_types_in_public_api, override_on_non_overriding_member, non_constant_identifier_names, must_be_immutable, unused_catch_clause
 
 import 'package:elevate/bank_details2.dart';
 import 'package:elevate/credit_score.dart';
@@ -7,7 +7,6 @@ import 'package:elevate/invest_stats.dart';
 import 'package:elevate/schedule_deduction.dart';
 import 'package:flutter/material.dart';
 import 'models/color.dart';
-import 'overlay.dart';
 import 'dart:io';
 import 'dart:async';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -134,28 +133,6 @@ final ColorClass lightmode = ColorClass(
   loadingBg: const Color.fromARGB(220, 255, 255, 255),
 );
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
-
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
-
 String action = '';
 String target_id = '';
 
@@ -164,6 +141,7 @@ int savingsI = 1;
 int homeI = 1;
 int investI = 1;
 int selectedindex = 0;
+String gotstate = '';
 
 Future makeUser2(Map user) async {
   User usered = User(
@@ -183,32 +161,144 @@ Future makeUser2(Map user) async {
     token: user['token'] ?? '',
     deduction: user['auto_deduction'] ?? 'false',
   );
+  String inv = user['inv'].toString();
   await DatabaseHelper.instance.makeAll(
-      usered,
-      user['loan'],
-      user['savings'],
-      user['transactions'],
-      user['investmentaccount']['investment'],
-      user['investmentaccount']['activity'],
-      user['bank'],
-      user['loan_products']);
+    usered,
+    user['loan'],
+    user['savings'],
+    user['transactions'],
+    user['investmentaccount']['investment'],
+    user['investmentaccount']['activity'],
+    user['bank'],
+    user['loan_products'],
+    inv,
+    user['beneficiary'],
+    user['notifications'],
+    user['officer'],
+  );
 }
 
-Future regetdata() async {
-  String url = apiUrl + 'get/user/';
+Future regetdata2() async {
+  try {
+    String url = apiUrl + 'get/user/';
 
-  dynamic token = await DatabaseHelper.instance.getToken();
-  Response res2 = await post(
-    Uri.parse(url),
-    headers: <String, String>{
-      'Content-Type': 'application/x-www-form-urlencoded',
-      'token': token,
-    },
-    body: (<String, String>{}),
-  );
-  if (res2.statusCode == 200) {
-    Map auser = json.decode(res2.body)['data']['user'];
-    await makeUser2(auser);
+    dynamic token = await DatabaseHelper.instance.getToken();
+    Response res2 = await post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'token': token,
+      },
+      body: (<String, String>{}),
+    ).timeout(const Duration(seconds: 15));
+    if (res2.statusCode == 200) {
+      Map auser = json.decode(res2.body)['data']['user'];
+      await makeUser2(auser);
+    }
+    gotstate = '';
+  } on SocketException catch (e) {
+    gotstate = 'network';
+  } on TimeoutException catch (e) {
+    gotstate = 'timeout';
+  }
+}
+
+Future regetdata(BuildContext cont, dynamic mode) async {
+  try {
+    String url = apiUrl + 'get/user/';
+
+    dynamic token = await DatabaseHelper.instance.getToken();
+    Response res2 = await post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'token': token,
+      },
+      body: (<String, String>{}),
+    ).timeout(const Duration(seconds: 15));
+    if (res2.statusCode == 200) {
+      Map auser = json.decode(res2.body)['data']['user'];
+      await makeUser2(auser);
+    }
+  } on SocketException catch (e) {
+    double myWidth = MediaQuery.of(cont).size.width;
+    ScaffoldMessenger.of(cont).showSnackBar(SnackBar(
+      padding: EdgeInsets.zero,
+      behavior: SnackBarBehavior.floating,
+      elevation: 0,
+      margin: EdgeInsets.fromLTRB(myWidth / 4, 0, myWidth / 4, 30),
+      backgroundColor: Color.fromARGB(150, 128, 128, 128),
+      duration: const Duration(seconds: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      content: Container(
+        width: myWidth / 2,
+        height: 30,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: mode.floatBg,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Network Error',
+                  style: TextStyle(
+                      color: mode.darkText1,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+    await Future.delayed(Duration(seconds: 5));
+    regetdata(cont, mode);
+  } on TimeoutException catch (e) {
+    double myWidth = MediaQuery.of(cont).size.width;
+    ScaffoldMessenger.of(cont).showSnackBar(SnackBar(
+      padding: EdgeInsets.zero,
+      behavior: SnackBarBehavior.floating,
+      elevation: 0,
+      margin: EdgeInsets.fromLTRB(myWidth / 4, 0, myWidth / 4, 30),
+      backgroundColor: Color.fromARGB(150, 128, 128, 128),
+      duration: const Duration(seconds: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+      content: Container(
+        width: myWidth / 2,
+        height: 30,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(5),
+          color: mode.floatBg,
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  'Request Timeout',
+                  style: TextStyle(
+                      color: mode.darkText1,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ));
+    regetdata(cont, mode);
   }
 }
 
@@ -251,8 +341,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    double myheight = MediaQuery.of(context).size.height;
-
     getMode();
 
     /*
@@ -270,7 +358,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (selectedindex == 3) {
         if (accountI == 4) {
           setState(() {
-            accountI = 3;
+            accountI = 1;
           });
           return false;
         } else if (accountI == 9) {
@@ -326,20 +414,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    List<Widget> actionList() {
-      Widget Check = const Padding(
-          padding: EdgeInsets.fromLTRB(0, 0, 20, 0),
-          child: Icon(Icons.save_alt));
-      if (selectedindex == 1) {
-        List<Widget> myactions = [
-          Check,
-        ];
-        return List.empty();
-      } else {
-        return List.empty();
-      }
-    }
-
     if (mode == null) {
       return Scaffold(
         appBar:
@@ -355,10 +429,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: mode.background1,
         body: MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaleFactor: 0.95),
+          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(0.95)),
           child: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
             final myHeight = constraints.maxHeight;
-            final myWidth = constraints.maxWidth;
 
             //List Widget
             Widget Home() {
@@ -539,7 +612,13 @@ The Settings Screen Tab
                 onTap: (int index) {
                   setState(() {
                     selectedindex = index;
+                    
                   });
+                  if (index == 3) {
+                    setState(() {
+                        accountI = 1;
+                    });
+                    }
                 },
                 currentIndex: selectedindex,
                 type: BottomNavigationBarType.fixed,

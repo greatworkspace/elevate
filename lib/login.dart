@@ -1,21 +1,23 @@
+// ignore_for_file: unused_catch_clause, unused_local_variable
+
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'models/color.dart';
 import 'shaker.dart';
-import 'overlay.dart';
 import 'dart:convert';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:convert';
 import 'package:http/http.dart';
 import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'home.dart';
 import 'models/databaseHelper.dart';
 import 'models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 const apiUrl = 'https://finx.ginnsltd.com/mobile/';
+const forgoturl = 'https://finx.ginnsltd.com/password/mail/send/';
 
 bool obscure = true;
 
@@ -70,12 +72,20 @@ class _LoginScreenState extends State<LoginScreen>
       token: user['token'] ?? '',
       deduction: user['auto_deduction'] ?? 'false',
     );
+    String inv = user['inv'].toString();
     await DatabaseHelper.instance.insertUser(usered);
     await DatabaseHelper.instance.insertLoan(user['loan']);
     await DatabaseHelper.instance.insertLoanP(user['loan_products']);
     await DatabaseHelper.instance.insertBank(user['bank']);
-    await DatabaseHelper.instance.insertSaving(user['savings'], user['transactions']);
-    await DatabaseHelper.instance.insertInvest(user['investmentaccount']['investment'], user['investmentaccount']['activity']);
+    await DatabaseHelper.instance.insertInvestA(inv);
+    await DatabaseHelper.instance.insertBeneficiary(user['beneficiary']);
+    await DatabaseHelper.instance.insertNoti(user['notifications']);
+    await DatabaseHelper.instance
+        .insertSaving(user['savings'], user['transactions']);
+    await DatabaseHelper.instance.insertInvest(
+        user['investmentaccount']['investment'],
+        user['investmentaccount']['activity']);
+    await DatabaseHelper.instance.insertOfficer(user['officer']);
   }
 
   dynamic mode = lightmode;
@@ -106,6 +116,13 @@ class _LoginScreenState extends State<LoginScreen>
     parent: _controller,
     curve: Curves.linear,
   );
+
+  _launchURL() async {
+    final Uri url = Uri.parse(forgoturl);
+    if (!await launchUrl(url)) {
+      throw Exception('Could not launch ${url}');
+    }
+  }
 
   void initState() {
     super.initState();
@@ -180,11 +197,12 @@ class _LoginScreenState extends State<LoginScreen>
 
     return Scaffold(body: SafeArea(
       child: LayoutBuilder(builder: (context, constraints) {
-        final myHeight = constraints.maxHeight;
         final myWidth = constraints.maxWidth;
+        final myHeight = constraints.maxHeight;
 
         //gettiing field sizes
         double fieldWidth = 0;
+        double topheight = myHeight - 380;
         if ((MediaQuery.of(context).size.width - 100) > 500) {
           fieldWidth = 450;
         } else {
@@ -193,6 +211,9 @@ class _LoginScreenState extends State<LoginScreen>
         double xpad = 20;
         if (myWidth > 768) {
           xpad = myWidth / 5;
+        }
+        if (topheight > 215) {
+          topheight = 215;
         }
 
         Widget CustomLoader = RotationTransition(
@@ -206,7 +227,7 @@ class _LoginScreenState extends State<LoginScreen>
               ),
             ));
         Widget loading = Container(
-          height: myHeight,
+          height: MediaQuery.of(context).size.height,
           width: myWidth,
           color: mode.loadingBg,
           child: Center(
@@ -218,62 +239,77 @@ class _LoginScreenState extends State<LoginScreen>
 
         //login function
         Future<String> login(String user, String pass) async {
+          err = '';
           FocusManager.instance.primaryFocus?.unfocus();
           String url = apiUrl + 'login/';
           setState(() {
             OverCon = loading;
           });
 
-          Response res2 = await post(
-            Uri.parse(url),
-            headers: <String, String>{
-              'Content-Type': 'application/x-www-form-urlencoded',
-              'email': user,
-              'password': pass,
-            },
-            body: (<String, String>{'email': user, 'password': pass}),
-          );
-          if (res2.statusCode == 200) {
-            dynamic token = json.decode(res2.body)['data']['token'];
-            if (token == null) {
-              token = 'null';
-              err = json.decode(res2.body)['data']['error'];
-              OverCon = container;
+          try {
+            Response res2 = await post(
+              Uri.parse(url),
+              headers: <String, String>{
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'email': user,
+                'password': pass,
+              },
+              body: (<String, String>{'email': user, 'password': pass}),
+            ).timeout(const Duration(seconds: 10));
+
+            if (res2.statusCode == 200) {
+              dynamic token = json.decode(res2.body)['data']['token'];
+              if (token == null) {
+                token = 'null';
+                err = json.decode(res2.body)['data']['error'];
+                OverCon = container;
+              } else {
+                setState(() {
+                  err = '';
+                });
+                await DatabaseHelper.instance.insertToken(token);
+                String imode;
+                if (mode == lightmode) {
+                  imode = 'light';
+                } else {
+                  imode = 'dark';
+                }
+                Map setting = {
+                  'id': 1,
+                  'mode': imode,
+                  'logged': 'True',
+                  'opened': 'True',
+                };
+                await DatabaseHelper.instance.insertSettings(setting);
+                Map auser = json.decode(res2.body)['data']['user'];
+                await makeUser(auser);
+                Navigator.of(context).pushNamed('Home');
+              }
+              String bodyI = res2.body;
+              String body = bodyI.substring(1, bodyI.length - 1);
+              return body;
             } else {
               setState(() {
-                err = '';
+                OverCon = container;
               });
-              await DatabaseHelper.instance.insertToken(token);
-              String imode;
-              if (mode == lightmode) {
-                imode = 'light';
-              } else {
-                imode = 'dark';
-              }
-              Map setting = {
-                'id': 1,
-                'mode': imode,
-                'logged': 'True',
-                'opened': 'True',
-              };
-              await DatabaseHelper.instance.insertSettings(setting);
-              Map auser = json.decode(res2.body)['data']['user'];
-              await makeUser(auser);
-              Navigator.of(context).pushNamed('Home');
+              return ('incorrect');
             }
-            String bodyI = res2.body;
-            String body = bodyI.substring(1, bodyI.length - 1);
-            return body;
-          } else {
+          } on SocketException catch (e) {
             setState(() {
-              OverCon = container;
+              OverCon = Container();
             });
-            return ('incorrect');
+            return ('network');
+          } on TimeoutException catch (e) {
+            setState(() {
+              OverCon = Container();
+            });
+            return ('timeout');
           }
         }
 
         Future<bool> popfunc() async {
           exit(0);
+          // ignore: dead_code
           return false;
         }
 
@@ -287,7 +323,7 @@ class _LoginScreenState extends State<LoginScreen>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Container(
-                      height: 215,
+                      height: topheight,
                       width: myWidth,
                       decoration: const BoxDecoration(
                         color: Color(0xff231E54),
@@ -297,46 +333,50 @@ class _LoginScreenState extends State<LoginScreen>
                           Image.asset(
                             'assets/images/login_bg.png',
                             width: myWidth,
+                            cacheHeight: (topheight * 2).floor(),
+                            cacheWidth: (myWidth * 2).floor(),
                             fit: BoxFit.cover,
-                            
                           ),
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                            padding: EdgeInsets.fromLTRB(topheight / 10.75,
+                                topheight / 10.75, topheight / 10.75, 0),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 20, 0, 15),
+                                  padding: EdgeInsets.fromLTRB(0,
+                                      topheight / 10.75, 0, topheight / 14.333),
                                   child: Container(
-                                    height: 58,
-                                    width: 58,
+                                    height: topheight / 3.7,
+                                    width: topheight / 3.7,
                                     child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(58),
+                                      borderRadius: BorderRadius.circular(
+                                          topheight / 3.7),
                                       child: Image.asset(
                                         'assets/images/circle_icon.png',
-                                        filterQuality: FilterQuality.medium,
-                                        height: 58,
-                                        width: 58,
+                                        height: topheight / 3.7,
+                                        width: topheight / 3.7,
+                                        cacheHeight: (topheight / 3.7).floor(),
+                                        cacheWidth: (topheight / 3.7).floor(),
                                       ),
                                     ),
                                   ),
                                 ),
-                                const Text(
+                                Text(
                                   'Welcome Back!',
                                   style: TextStyle(
-                                      fontSize: 23,
+                                      fontSize: topheight / 9.347,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white),
                                 ),
                                 const SizedBox(
                                   height: 2,
                                 ),
-                                const Text(
+                                Text(
                                   'Enter your Email and your password.',
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: topheight / 17.916,
                                   ),
                                 )
                               ],
@@ -432,12 +472,14 @@ class _LoginScreenState extends State<LoginScreen>
                             Padding(
                               padding: const EdgeInsets.fromLTRB(0, 15, 0, 0),
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width,
-                                child: const Text(
-                                  'Forgot Password?',
-                                  textAlign: TextAlign.end,
-                                  style: TextStyle(
-                                      color: Color(0xff0080C8), fontSize: 15),
+                                child: TextButton(
+                                  onPressed: _launchURL,
+                                  child: const Text(
+                                    'Forgot Password?',
+                                    textAlign: TextAlign.end,
+                                    style: TextStyle(
+                                        color: Color(0xff0080C8), fontSize: 15),
+                                  ),
                                 ),
                               ),
                             ),
@@ -450,7 +492,7 @@ class _LoginScreenState extends State<LoginScreen>
                               height: 56,
                               child: TextButton(
                                 style: TextButton.styleFrom(
-                                  primary: Colors.white,
+                                  foregroundColor: Colors.white,
                                   backgroundColor: const Color(0xff231E54),
                                   shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(10)),
@@ -487,6 +529,59 @@ class _LoginScreenState extends State<LoginScreen>
                                           err =
                                               'Incorrect Username or Password';
                                         });
+                                      } else if (resp == 'network' ||
+                                          resp == 'timeout') {
+                                        String myerr = 'Network Error';
+                                        if (resp == 'timeout') {
+                                          myerr = 'Request Timeout';
+                                        }
+                                        ScaffoldMessenger.of(context)
+                                            .showSnackBar(SnackBar(
+                                          padding: EdgeInsets.zero,
+                                          behavior: SnackBarBehavior.floating,
+                                          elevation: 0,
+                                          margin: EdgeInsets.fromLTRB(
+                                              myWidth / 4, 0, myWidth / 4, 30),
+                                          backgroundColor: Color.fromARGB(
+                                              150, 128, 128, 128),
+                                          duration: const Duration(seconds: 2),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(5)),
+                                          content: Container(
+                                            width: myWidth / 2,
+                                            height: 30,
+                                            decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(5),
+                                              color: mode.floatBg,
+                                            ),
+                                            child: Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      myerr,
+                                                      style: TextStyle(
+                                                          color: mode.darkText1,
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.bold),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ));
                                       }
                                     }
                                   }
@@ -518,7 +613,7 @@ class _LoginScreenState extends State<LoginScreen>
                                       color: mode.brightText1,
                                       fontSize: 12)),
                               TextSpan(
-                                  text: 'www.elevate.com ',
+                                  text: 'www.elevatemfb.com ',
                                   style: TextStyle(
                                       fontFamily:
                                           GoogleFonts.notoSans().fontFamily,

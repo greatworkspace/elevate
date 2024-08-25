@@ -1,3 +1,7 @@
+// ignore_for_file: unused_catch_clause
+
+import 'dart:io';
+
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 
@@ -41,7 +45,6 @@ final List<Map<String, dynamic>> sourcetypes = [
 class _EnterPinState extends State<EnterPin>
     with SingleTickerProviderStateMixin {
   dynamic mode = lightmode;
-  late Timer _timer;
 
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
@@ -95,47 +98,9 @@ class _EnterPinState extends State<EnterPin>
   }
 
   Future maketrans() async {
-    if (action == 'transfer') {
-      String url = apiUrl + 'make/transfer/';
-      dynamic token = await DatabaseHelper.instance.getToken();
-      Response res2 = await post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'token': token,
-          'pin': pinCon.text,
-          'amount': getNum(amountCon.text).toString(),
-          'account': accNo,
-          'note': narateCon.text,
-        },
-        body: (<String, String>{}),
-      );
-      if (res2.statusCode == 200) {
-        Map data = json.decode(res2.body);
-        if (data['error'] == 'incorrect pin') {
-          setState(() {
-            OverCon = Wrongpin;
-          });
-        }
-        if (data['result'] == 'success') {
-          regetdata();
-          setState(() {
-            OverCon = Correctpin;
-          });
-        } else {
-          setState(() {
-            OverCon = Failedtrans;
-          });
-        }
-      } else {
-        setState(() {
-          OverCon = Container();
-        });
-      }
-    } else if (action == 'buyplan') {
-      if (pl != -1) {
-        int planid = mplans[pl]['id'];
-        String url = apiUrl + 'buy/plan/';
+    try {
+      if (action == 'transfer') {
+        String url = apiUrl + 'make/transfer/';
         dynamic token = await DatabaseHelper.instance.getToken();
         Response res2 = await post(
           Uri.parse(url),
@@ -144,11 +109,91 @@ class _EnterPinState extends State<EnterPin>
             'token': token,
             'pin': pinCon.text,
             'amount': getNum(amountCon.text).toString(),
-            'plan': planid.toString(),
+            'account': accNo,
             'note': narateCon.text,
           },
           body: (<String, String>{}),
-        );
+        ).timeout(const Duration(seconds: 10));
+        if (res2.statusCode == 200) {
+          Map data = json.decode(res2.body);
+
+          if (data['result'] == 'success') {
+            regetdata(context, mode);
+            setState(() {
+              OverCon = Correctpin;
+            });
+          } else {
+            if (data['error'] == 'incorrect pin') {
+              setState(() {
+                OverCon = Wrongpin;
+              });
+            } else {
+              setState(() {
+                OverCon = Failedtrans;
+              });
+            }
+          }
+        } else {
+          setState(() {
+            OverCon = Failedtrans;
+          });
+        }
+      } else if (action == 'buyplan') {
+        if (pl != -1) {
+          int planid = mplans[pl]['id'];
+          String url = apiUrl + 'buy/plan/';
+          dynamic token = await DatabaseHelper.instance.getToken();
+          Response res2 = await post(
+            Uri.parse(url),
+            headers: <String, String>{
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'token': token,
+              'pin': pinCon.text,
+              'amount': getNum(amountCon.text).toString(),
+              'plan': planid.toString(),
+              'note': narateCon.text,
+            },
+            body: (<String, String>{}),
+          ).timeout(const Duration(seconds: 10));
+          if (res2.statusCode == 200) {
+            Map data = json.decode(res2.body);
+            if (data['error'] == 'incorrect pin') {
+              setState(() {
+                OverCon = Wrongpin;
+              });
+            }
+            if (data['result'] == 'success') {
+              regetdata(context, mode);
+              setState(() {
+                OverCon = Correctpin;
+              });
+            } else {
+              setState(() {
+                OverCon = Failedtrans;
+              });
+            }
+          } else {
+            setState(() {
+              OverCon = Container();
+            });
+          }
+        } else {
+          setState(() {
+            OverCon = Failedtrans;
+          });
+        }
+      } else if (action == 'payloan') {
+        String url = apiUrl + 'make/installment/';
+        dynamic token = await DatabaseHelper.instance.getToken();
+        Response res2 = await post(
+          Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'token': token,
+            'pin': pinCon.text,
+          },
+          body: (<String, String>{}),
+        ).timeout(const Duration(seconds: 10));
         if (res2.statusCode == 200) {
           Map data = json.decode(res2.body);
           if (data['error'] == 'incorrect pin') {
@@ -157,7 +202,7 @@ class _EnterPinState extends State<EnterPin>
             });
           }
           if (data['result'] == 'success') {
-            regetdata();
+            regetdata(context, mode);
             setState(() {
               OverCon = Correctpin;
             });
@@ -167,89 +212,94 @@ class _EnterPinState extends State<EnterPin>
             });
           }
         } else {
-          print('error');
           setState(() {
             OverCon = Container();
           });
         }
-      } else {
-        setState(() {
-          OverCon = Failedtrans;
-        });
-      }
-    } else if (action == 'payloan') {
-      String url = apiUrl + 'make/installment/';
-      dynamic token = await DatabaseHelper.instance.getToken();
-      Response res2 = await post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'token': token,
-          'pin': pinCon.text,
-        },
-        body: (<String, String>{}),
-      );
-      if (res2.statusCode == 200) {
-        Map data = json.decode(res2.body);
-        if (data['error'] == 'incorrect pin') {
-          setState(() {
-            OverCon = Wrongpin;
-          });
-        }
-        if (data['result'] == 'success') {
-          regetdata();
-          setState(() {
-            OverCon = Correctpin;
-          });
+      } else if (action == 'target') {
+        String url = apiUrl + 'pay/target/';
+        dynamic token = await DatabaseHelper.instance.getToken();
+        Response res2 = await post(
+          Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'token': token,
+            'pin': pinCon.text,
+            'amount': getNum(amountCon.text).toString(),
+            'id': ToWhere,
+            'note': narated,
+          },
+          body: (<String, String>{}),
+        ).timeout(const Duration(seconds: 10));
+        if (res2.statusCode == 200) {
+          dynamic data = json.decode(res2.body);
+          if (data['error'] == 'incorrect pin') {
+            setState(() {
+              OverCon = Wrongpin;
+            });
+          }
+          if (data['result'] == 'success') {
+            regetdata(context, mode);
+            setState(() {
+              OverCon = Correctpin;
+            });
+          } else {
+            setState(() {
+              OverCon = Failedtrans;
+            });
+          }
         } else {
           setState(() {
-            OverCon = Failedtrans;
+            OverCon = Container();
           });
         }
-      } else {
-        print('error');
-        setState(() {
-          OverCon = Container();
-        });
-      }
-    } else if (action == 'target') {
-      String url = apiUrl + 'pay/target/';
-      dynamic token = await DatabaseHelper.instance.getToken();
-      Response res2 = await post(
-        Uri.parse(url),
-        headers: <String, String>{
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'token': token,
-          'pin': pinCon.text,
-          'amount': getNum(amountCon.text).toString(),
-          'id': ToWhere,
-          'note': narated,
-        },
-        body: (<String, String>{}),
-      );
-      if (res2.statusCode == 200) {
-        dynamic data = json.decode(res2.body);
-        if (data['error'] == 'incorrect pin') {
-          setState(() {
-            OverCon = Wrongpin;
-          });
-        }
-        if (data['result'] == 'success') {
-          regetdata();
-          setState(() {
-            OverCon = Correctpin;
-          });
+      } else if (action == 'withdraw') {
+        String url = apiUrl + 'make/withdrawal/';
+        dynamic token = await DatabaseHelper.instance.getToken();
+        Response res2 = await post(
+          Uri.parse(url),
+          headers: <String, String>{
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'token': token,
+            'pin': pinCon.text,
+            'amount': getNum(amountCon.text).toString(),
+            'purpose': narateCon.text,
+          },
+          body: (<String, String>{}),
+        ).timeout(const Duration(seconds: 10));
+        if (res2.statusCode == 200) {
+          dynamic data = json.decode(res2.body);
+          if (data['result'] == 'incorrect pin') {
+            setState(() {
+              OverCon = Wrongpin;
+            });
+          }
+          if (data['result'] == 'success') {
+            regetdata(context, mode);
+            setState(() {
+              OverCon = Correctpin;
+            });
+          } else {
+            setState(() {
+              OverCon = Failedtrans;
+            });
+          }
         } else {
           setState(() {
-            OverCon = Failedtrans;
+            OverCon = Container();
           });
         }
-      } else {
-        print('error');
-        setState(() {
-          OverCon = Container();
-        });
       }
+    } on SocketException catch (e) {
+      setState(() {
+        OverCon = Container();
+      });
+      return ('network');
+    } on TimeoutException catch (e) {
+      setState(() {
+        OverCon = Container();
+      });
+      return ('timeout');
     }
   }
 
@@ -305,14 +355,6 @@ class _EnterPinState extends State<EnterPin>
             );
           }
 
-          Widget Falsefilled() {
-            return Container(
-              height: 8,
-              width: 8,
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8), color: Colors.red),
-            );
-          }
 
           Widget Filled1 = Unfilled();
           Widget Filled4 = Unfilled();
@@ -598,159 +640,6 @@ class _EnterPinState extends State<EnterPin>
                 ],
               ));
 
-          void startPinTimer() {
-            const twoSec = const Duration(seconds: 2);
-            _timer = Timer(
-              twoSec,
-              () {
-                Filled1 = Unfilled();
-                Filled2 = Unfilled();
-                Filled3 = Unfilled();
-                Filled4 = Unfilled();
-
-                if (pinCon.text == '1234') {
-                  setState(() {
-                    pinState = 'correct';
-                  });
-                } else {
-                  setState(() {
-                    pinState = 'incorrect';
-                  });
-                }
-                if (pinState == 'incorrect') {
-                  Widget container = Container(
-                      height: myHeight,
-                      width: myWidth,
-                      color: mode.background2,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: myHeight / 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                SvgPicture.asset(
-                                    'assets/svg/request_incorrect.svg'),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                Text(
-                                  'Incorrect Pin',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: mode.brightText1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: myHeight / 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 0, 100),
-                                  child: SizedBox(
-                                    height: 54,
-                                    width: myWidth - 40,
-                                    child: TextButton(
-                                        style: TextButton.styleFrom(
-                                          backgroundColor:
-                                              const Color(0xff23AA59),
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            pinCon.text = '';
-                                            pinState = 'unfilled';
-                                            OverCon = Container();
-                                          });
-                                        },
-                                        child: const Text(
-                                          'Try Again',
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            color: Colors.white,
-                                          ),
-                                        )),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ));
-                  OverCon = container;
-                } else if (pinState == 'correct') {
-                  Widget container = Container(
-                      height: myHeight,
-                      width: myWidth,
-                      color: mode.background2,
-                      child: Column(
-                        children: [
-                          SizedBox(
-                            height: myHeight / 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                SvgPicture.asset('assets/svg/request_sent.svg'),
-                                const SizedBox(
-                                  height: 20,
-                                ),
-                                Text(
-                                  'Request Sent',
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    color: mode.brightText1,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(
-                            height: myHeight / 2,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 0, 100),
-                                  child: Container(
-                                    child: TextButton(
-                                        style: TextButton.styleFrom(
-                                          padding: const EdgeInsets.all(20),
-                                          backgroundColor: mode.background2,
-                                        ),
-                                        onPressed: () {
-                                          setState(() {});
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      HomeScreen(
-                                                        index: selectedindex,
-                                                      )));
-                                        },
-                                        child: Text(
-                                          'Back to HomePage',
-                                          style: TextStyle(
-                                            fontSize: 15,
-                                            color: mode.brightText1,
-                                          ),
-                                        )),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ));
-                  OverCon = container;
-                }
-              },
-            );
-          }
 
           if (pinCon.text.length <= 3) {
             if (pinCon.text.length >= 1) {
@@ -785,7 +674,50 @@ class _EnterPinState extends State<EnterPin>
 
           Future getreq() async {
             OverCon = loading;
-            await maketrans();
+            String resp = await maketrans() ?? '';
+            if (resp == 'network' || resp == 'timeout') {
+              String myerr = 'Network Error';
+              if (resp == 'timeout') {
+                myerr = 'Request Timeout';
+              }
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                padding: EdgeInsets.zero,
+                behavior: SnackBarBehavior.floating,
+                elevation: 0,
+                margin: EdgeInsets.fromLTRB(myWidth / 4, 0, myWidth / 4, 30),
+                backgroundColor: Color.fromARGB(150, 128, 128, 128),
+                duration: const Duration(seconds: 2),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5)),
+                content: Container(
+                  width: myWidth / 2,
+                  height: 30,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: mode.floatBg,
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            myerr,
+                            style: TextStyle(
+                                color: mode.darkText1,
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ));
+            }
           }
 
           double greenConHeight;

@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable, unnecessary_null_comparison
+
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
@@ -5,8 +7,6 @@ import 'package:flutter_svg/svg.dart';
 import 'package:flutter/cupertino.dart';
 import 'models/databaseHelper.dart';
 import 'models/user.dart';
-import 'dart:convert';
-import 'package:http/http.dart';
 
 const apiUrl = 'https://finx.ginnsltd.com/mobile/';
 
@@ -25,30 +25,6 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
-
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
-
-
-
 class MAccountScreen extends StatefulWidget {
   MAccountScreen({
     required this.amode,
@@ -62,7 +38,9 @@ class MAccountScreen extends StatefulWidget {
   _MAccountScreenState createState() => _MAccountScreenState();
 }
 
+User? myuser = null;
 dynamic mode = mode;
+bool gotdata = false;
 
 class _MAccountScreenState extends State<MAccountScreen>
     with SingleTickerProviderStateMixin {
@@ -83,20 +61,17 @@ class _MAccountScreenState extends State<MAccountScreen>
     curve: Curves.linear,
   );
 
-  
-  
-
-
-
-  
-
   Future getUser() async {
-    return (await DatabaseHelper.instance.getUser());
+    User use = await DatabaseHelper.instance.getUser();
+    setState(() {
+      myuser = use;
+      gotdata = true;
+    });
+    return (true);
   }
 
   void initState() {
     super.initState();
-    
   }
 
   @override
@@ -108,9 +83,6 @@ class _MAccountScreenState extends State<MAccountScreen>
   Widget build(BuildContext context) {
     dynamic mode = widget.amode;
     bool inivalue;
-    bool inivalue2;
-    bool inivalue3;
-    bool inivalue4;
     Widget ModeSwitch() {
       if (mode.name == 'Light') {
         inivalue = false;
@@ -145,7 +117,6 @@ class _MAccountScreenState extends State<MAccountScreen>
       );
     }
 
-    
     Widget Modepic = Container();
 
     if (mode.name == 'Light') {
@@ -169,13 +140,31 @@ class _MAccountScreenState extends State<MAccountScreen>
                 future: getUser(),
                 builder:
                     (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-                  if (snapshot.hasData) {
-                    User user = snapshot.data;
-                     String imageurl = 'assets/images/default_pic.png';
-            if (user.image != '' || user.image != null) {
-              imageurl = user.image;
-            }
-                    String name = user.firstname + ' ' + user.lastname;
+                  if (snapshot.hasData || gotdata) {
+                    User? user = myuser;
+                    Widget imagecon() {
+                      String imageurl = 'assets/images/default_pic.png';
+                      if (user!.image != '' || user.image != null) {
+                        imageurl = user.image;
+                        return Image.network(
+                          imageurl,
+                          alignment: Alignment.center,
+                          height: 60,
+                          cacheHeight: 124,
+                          cacheWidth: 124,
+                        );
+                      } else {
+                        return Image.asset(
+                          imageurl,
+                          alignment: Alignment.center,
+                          height: 60,
+                          cacheHeight: 124,
+                          cacheWidth: 124,
+                        );
+                      }
+                    }
+
+                    String name = user!.firstname + ' ' + user.lastname;
                     return LayoutBuilder(builder: (context, constraints) {
                       final myHeight = constraints.maxHeight;
                       final myWidth = constraints.maxWidth;
@@ -240,14 +229,14 @@ class _MAccountScreenState extends State<MAccountScreen>
                                           children: [
                                             Row(children: [
                                               SizedBox(
-                                  height: 62,
-                                  width:62,
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(65),
-                                
-                                    child: Image.network(imageurl,  alignment: Alignment.center, filterQuality: FilterQuality.low),
-                                  ),
-                                ),
+                                                height: 62,
+                                                width: 62,
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(62),
+                                                  child: imagecon(),
+                                                ),
+                                              ),
                                               const SizedBox(
                                                 width: 10,
                                               ),
@@ -629,7 +618,8 @@ class _MAccountScreenState extends State<MAccountScreen>
                                     child: SizedBox(
                                       child: TextButton(
                                         onPressed: () async {
-                                          await DatabaseHelper.instance.logoutdb();
+                                          await DatabaseHelper.instance
+                                              .logoutdb();
                                           Navigator.of(context)
                                               .pushNamed('Login');
                                         },

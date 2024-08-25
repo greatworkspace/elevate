@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'models/color.dart';
@@ -47,7 +49,8 @@ class _LoanProductState extends State<LoanProduct> {
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
 
-  Map item = loanProducts.where((element) => element['id'] == loanpi).toList()[0];
+  Map item =
+      loanProducts.where((element) => element['id'] == loanpi).toList()[0];
 
   void getMode() async {
     Map settings = await DatabaseHelper.instance.getSettings();
@@ -83,6 +86,7 @@ class _LoanProductState extends State<LoanProduct> {
       final myWidth = constraints.maxWidth;
       // creating custom widgets
 
+      // ignore: unused_local_variable
       Widget continuebtn;
 
       Widget greycontinue = TextButton(
@@ -99,26 +103,6 @@ class _LoanProductState extends State<LoanProduct> {
           shape: MaterialStateProperty.all(RoundedRectangleBorder(
               side: const BorderSide(
                 color: Color(0xffD9D9D9),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10.0))),
-        ),
-      );
-
-      Widget realcontinue = TextButton(
-        onPressed: null,
-        child: const Text(
-          'Next',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(const Color(0xff23AA59)),
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Color(0xff23AA59),
                 width: 1,
               ),
               borderRadius: BorderRadius.circular(10.0))),
@@ -252,46 +236,48 @@ class _LoanProductState extends State<LoanProduct> {
                               height: 1.5,
                             ),
                           ),
-                          SizedBox(height: 20,),
-                          RichText(text: TextSpan(children: [
-                             TextSpan(
+                          SizedBox(
+                            height: 20,
+                          ),
+                          RichText(
+                              text: TextSpan(children: [
+                            TextSpan(
                               text: 'To apply for ',
-                               style: TextStyle(
-                              color: mode.brightText1,
-                              fontSize: 12,
-                              height: 1.5,
-                            ),
+                              style: TextStyle(
+                                color: mode.brightText1,
+                                fontSize: 12,
+                                height: 1.5,
+                              ),
                             ),
                             TextSpan(
                               text: item['name'],
-                               style: TextStyle(
-                              color: mode.brightText1,
-                              fontSize: 12,
-                              height: 1.5,
+                              style: TextStyle(
+                                color: mode.brightText1,
+                                fontSize: 12,
+                                height: 1.5,
+                              ),
                             ),
-                            ),
-                           TextSpan(
+                            TextSpan(
                               text: ', visit ',
-                               style: TextStyle(
-                              color: mode.brightText1,
-                              fontSize: 12,
-                              height: 1.5,
-                            ),
+                              style: TextStyle(
+                                color: mode.brightText1,
+                                fontSize: 12,
+                                height: 1.5,
+                              ),
                             ),
                             const TextSpan(
-                              text: 'www.elevate.com',
-                               style: TextStyle(
-                              color: Color(0xff8194DD),
-                              fontSize: 12,
-                              height: 1.5,
-                            ),
+                              text: 'www.elevatemfb.com',
+                              style: TextStyle(
+                                color: Color(0xff8194DD),
+                                fontSize: 12,
+                                height: 1.5,
+                              ),
                             )
                           ]))
                         ],
                       ),
                     ),
                   ),
-                  
                 ],
               ),
             )

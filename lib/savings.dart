@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable, unused_local_variable
+
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'humanizeAmount.dart';
@@ -7,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -38,14 +39,19 @@ class SavingsScreen extends StatefulWidget {
 }
 
 dynamic mode = mode;
+String mystate = 'got';
 
 int _index = 0;
-bool _open = false;
 bool savings = false;
 bool saveMode = false;
+bool gotdata = false;
 
 int transIndex = 0;
 bool hidebal = false;
+
+dynamic mydata = null;
+dynamic mysavings = null;
+dynamic mytrans = null;
 
 class _SavingsScreenState extends State<SavingsScreen>
     with SingleTickerProviderStateMixin {
@@ -80,6 +86,99 @@ class _SavingsScreenState extends State<SavingsScreen>
   DateFormat dateFormat = DateFormat.yMMMMd();
   DateFormat timeFormat = DateFormat.jm();
 
+  Future regetdata3() async {
+    setState(() {
+      mystate = 'getting';
+    });
+    await regetdata2();
+    Future.delayed(Duration(seconds: 2)).then((value) {
+      setState(() {
+        mystate = 'got';
+      });
+    });
+    if (gotstate == 'network') {
+      double myWidth2 = MediaQuery.of(context).size.width;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(myWidth2 / 4, 0, myWidth2 / 4, 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth2 / 2,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Network Error',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      await Future.delayed(Duration(seconds: 5));
+      regetdata(context, mode);
+    }
+    if (gotstate == 'timeout') {
+      double myWidth2 = MediaQuery.of(context).size.width;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(myWidth2 / 4, 0, myWidth2 / 4, 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth2 / 2,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Request Timeout',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      regetdata(context, mode);
+    }
+  }
+
   void initState() {
     super.initState();
     gethidebal();
@@ -101,11 +200,15 @@ class _SavingsScreenState extends State<SavingsScreen>
       dynamic saving = await DatabaseHelper.instance.getSaving();
       dynamic trans = await DatabaseHelper.instance.getTrans();
 
-      return {
-        'data': got,
-        'savings': saving,
-        'trans': trans,
-      };
+      if (mystate == 'got') {
+        setState(() {
+          mydata = got;
+          mysavings = saving;
+          mytrans = trans;
+          gotdata = true;
+        });
+      }
+      return (true);
     }
 
     Widget floatingWidget() {
@@ -122,30 +225,26 @@ class _SavingsScreenState extends State<SavingsScreen>
     return FutureBuilder(
         future: mgetUser(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasData) {
-            User user = snapshot.data['data'];
-            dynamic saving = snapshot.data['savings'];
-            dynamic transactions = snapshot.data['trans'];
+          if (snapshot.hasData || gotdata) {
+            User user = mydata;
             String accountNo = user.account;
-            if (saving['id'] == null) {
+            if (mysavings['id'] == null) {
               saveMode = false;
             } else {
               saveMode = true;
             }
             if (saveMode == true) {
               return Scaffold(
+                backgroundColor: mode.background3,
                 body: SafeArea(
                     child: LayoutBuilder(builder: (context, constraints) {
                   final myHeight = constraints.maxHeight;
                   final myWidth = constraints.maxWidth;
 
                   //building custom widgets
-                  Widget noSavings() {
-                    return Container();
-                  }
 
                   Widget Topcard() {
-                    if (myWidth < 768) {
+                    if (myWidth < 768 && myHeight > 580) {
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: Container(
@@ -184,7 +283,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                               width: 7,
                                             ),
                                             Text(
-                                              humanizeNo(saving['balance']),
+                                              humanizeNo(mysavings['balance']),
                                               style: TextStyle(
                                                 fontSize: iniwidth / 15,
                                                 color: Colors.white,
@@ -226,26 +325,26 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                   fontSize: 10,
                                                   color: Colors.white),
                                             ),
-                                            TextButton(
-                                              onPressed: () {
-                                                setState(() {
-                                                  savingsI = 6;
-                                                });
-                                              },
-                                              style: TextButton.styleFrom(
-                                                padding: EdgeInsets.zero,
-                                              ),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.fromLTRB(
-                                                        5, 0, 0, 0),
-                                                child: SvgPicture.asset(
-                                                  'assets/svg/pie.svg',
-                                                  height: myWidth * 7 / 100,
-                                                  width: myWidth * 7 / 100,
-                                                ),
-                                              ),
-                                            )
+                                            //TextButton(
+                                            //  onPressed: () {
+                                            //    setState(() {
+                                            //      savingsI = 6;
+                                            //    });
+                                            //  },
+                                            //  style: TextButton.styleFrom(
+                                            //    padding: EdgeInsets.zero,
+                                            //  ),
+                                            //  child: Padding(
+                                            //    padding:
+                                            //       const EdgeInsets.fromLTRB(
+                                            //          5, 0, 0, 0),
+                                            // child: SvgPicture.asset(
+                                            //       'assets/svg/pie.svg',
+                                            //         height: myWidth * 7 / 100,
+                                            //     width: myWidth * 7 / 100,
+                                            //       ),
+                                            //   ),
+                                            // )
                                           ],
                                         ),
                                         AccBal(),
@@ -406,11 +505,61 @@ class _SavingsScreenState extends State<SavingsScreen>
                     }
                     //for tablet
                     else {
+                      double iniwidth;
+                      if (myWidth > 600) {
+                        iniwidth = 600;
+                      } else {
+                        iniwidth = myWidth;
+                      }
+
+                      double cardheight = 140;
+                      double height42 = 42;
+                      double font20 = 20;
+                      double font30 = 30;
+                      double font35 = 35;
+                      double height50 = 50;
+                      double height20 = 10;
+                      double height17 = 8.5;
+                      double font13 = 7.5;
+                      double xxfont = iniwidth / 15;
+                      double height46 = 46;
+                      double availwidth = 300;
+                      double otherwidth = (myWidth - 62) - 340;
+                      double otherwidth2 = (myWidth - 62) - 620;
+                      double height280 = 280;
+                      double height80 = 80;
+                      double height40 = 40;
+                      double height12 = 12;
+                      double height15 = 15;
+                      double font15 = 15;
+                      if (myWidth < 767) {
+                        cardheight = 100;
+                        height42 = 21;
+                        font20 = 10;
+                        font30 = 15;
+                        height50 = 25;
+                        height20 = 10;
+                        height17 = 8.5;
+                        font35 = 15;
+                        font13 = 7.5;
+                        xxfont = iniwidth / 25;
+                        height46 = 23;
+                        availwidth = (myWidth - 62) - 160;
+                        otherwidth = 160;
+                        height280 = 160;
+                        height80 = 40;
+                        height40 = 20;
+                        height12 = 6;
+                        height15 = 7.5;
+                        otherwidth2 = 0;
+                        font15 = 7.5;
+                      }
+
                       return Padding(
                         padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                         child: Container(
                           width: myWidth - 20,
-                          height: 140,
+                          height: cardheight,
                           decoration: BoxDecoration(
                               color: const Color(0xff12201B),
                               borderRadius: BorderRadius.circular(15),
@@ -420,28 +569,21 @@ class _SavingsScreenState extends State<SavingsScreen>
                             padding: const EdgeInsets.all(20),
                             child: Builder(
                               builder: (context) {
-                                double iniwidth;
-                                if (myWidth > 600) {
-                                  iniwidth = 600;
-                                } else {
-                                  iniwidth = myWidth;
-                                }
-
                                 Widget AccBal() {
                                   if (hidebal == false) {
                                     return Row(
                                       children: [
                                         SvgPicture.asset(
                                           'assets/svg/naira.svg',
-                                          height: 46,
+                                          height: height46,
                                         ),
                                         const SizedBox(
                                           width: 7,
                                         ),
                                         Text(
-                                          humanizeNo(saving['balance']),
+                                          humanizeNo(mysavings['balance']),
                                           style: TextStyle(
-                                            fontSize: 35,
+                                            fontSize: font35,
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -454,7 +596,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                         Text(
                                           '****',
                                           style: TextStyle(
-                                            fontSize: iniwidth / 15,
+                                            fontSize: xxfont,
                                             color: Colors.white,
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -466,20 +608,21 @@ class _SavingsScreenState extends State<SavingsScreen>
 
                                 return Row(
                                   crossAxisAlignment: CrossAxisAlignment.center,
-                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Container(
-                                      width: 260,
+                                      width: availwidth,
                                       child: Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
                                         children: [
-                                          const Text(
+                                          Text(
                                             'Available Balance',
                                             style: TextStyle(
-                                                fontSize: 20,
+                                                fontSize: font20,
                                                 color: Colors.white),
                                           ),
                                           AccBal(),
@@ -487,12 +630,12 @@ class _SavingsScreenState extends State<SavingsScreen>
                                       ),
                                     ),
                                     Container(
-                                      width: (myWidth - 62) - 340,
+                                      width: otherwidth,
                                       child: Row(
                                         children: [
                                           SizedBox(
-                                            height: 50,
-                                            width: 280,
+                                            height: height50,
+                                            width: height280,
                                             child: TextButton(
                                               onPressed: () async {
                                                 Clipboard.setData(ClipboardData(
@@ -526,7 +669,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                                           5)),
                                                           content: Container(
                                                             width: myWidth / 2,
-                                                            height: 40,
+                                                            height: height40,
                                                             decoration:
                                                                 BoxDecoration(
                                                               borderRadius:
@@ -569,7 +712,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                                       color: mode
                                                                           .darkText1,
                                                                       height:
-                                                                          12,
+                                                                          height12,
                                                                     )
                                                                   ],
                                                                 ),
@@ -604,7 +747,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                         Text(
                                                           'Account Number:',
                                                           style: TextStyle(
-                                                              fontSize: 15,
+                                                              fontSize: font15,
                                                               color: const Color(
                                                                   0xffE0F5E9)),
                                                         ),
@@ -614,57 +757,62 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                         Text(
                                                           accountNo,
                                                           style: TextStyle(
-                                                              fontSize: 15,
+                                                              fontSize: font15,
                                                               color: const Color(
                                                                   0xffE0F5E9)),
+                                                        ),
+                                                        Padding(
+                                                          padding:
+                                                              const EdgeInsets
+                                                                  .fromLTRB(
+                                                                  4, 0, 4, 0),
+                                                          child:
+                                                              SvgPicture.asset(
+                                                            'assets/svg/copy.svg',
+                                                            height: 15,
+                                                            width: 15,
+                                                          ),
                                                         )
                                                       ],
                                                     ),
-                                                    SvgPicture.asset(
-                                                      'assets/svg/copy.svg',
-                                                      height: 15,
-                                                      width: 15,
-                                                    )
                                                   ],
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          SizedBox(
-                                              width:
-                                                  ((myWidth - 62) - 340) - 280)
+                                          SizedBox(width: otherwidth2),
                                         ],
                                       ),
                                     ),
-                                    Container(
-                                      width: 80,
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.end,
-                                        children: [
-                                          TextButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                savingsI = 6;
-                                              });
-                                            },
-                                            style: TextButton.styleFrom(
-                                              padding: EdgeInsets.zero,
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      5, 0, 0, 0),
-                                              child: SvgPicture.asset(
-                                                'assets/svg/pie.svg',
-                                                height: 42,
-                                                width: 42,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    )
+                                    //       Container(
+                                    //         width: height80,
+                                    //         child: Row(
+                                    //           mainAxisAlignment:
+                                    //               MainAxisAlignment.end,
+                                    //           children: [
+                                    //             TextButton(
+                                    //               onPressed: () {
+                                    //                 setState(() {
+                                    //                   savingsI = 6;
+                                    //                 });
+                                    //               },
+                                    //              style: TextButton.styleFrom(
+                                    //               padding: EdgeInsets.zero,
+                                    //            ),
+                                    //           child: Padding(
+                                    //            padding:
+                                    //               const EdgeInsets.fromLTRB(
+                                    //                  5, 0, 0, 0),
+                                    //         child: SvgPicture.asset(
+                                    //          'assets/svg/pie.svg',
+                                    //         height: 42,
+                                    //        width: 42,
+                                    //      ),
+                                    //   ),
+                                    // ),
+                                    //     ],
+                                    //    ),
+                                    //            )
                                   ],
                                 );
                               },
@@ -676,10 +824,28 @@ class _SavingsScreenState extends State<SavingsScreen>
                   }
 
                   Widget TransList() {
+                    if (mytrans.length <= 0) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+                        child: Container(
+                            child: Text('No Transaction Found',
+                                style: TextStyle(
+                                  color: mode.brightText1,
+                                ))),
+                      );
+                    }
                     double transconheight = 0;
+                    int coun = 5;
+                    if (mytrans.length < coun) {
+                      coun = mytrans.length;
+                    }
                     if (myWidth < 768) {
                       transconheight =
                           (myHeight - (myWidth - 20) / 2.263) - 334.2;
+                      if (myHeight < 580) {
+                        transconheight =
+                            (myHeight - (myWidth - 20) / 2.263) - 242;
+                      }
                     } else {
                       transconheight = myHeight - 488.2;
                     }
@@ -696,7 +862,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 10),
                           child: ListView.builder(
-                            itemCount: 5,
+                            itemCount: coun,
                             itemBuilder: (context, index) {
                               Widget divider = Row(
                                 children: [
@@ -710,45 +876,77 @@ class _SavingsScreenState extends State<SavingsScreen>
                                   )
                                 ],
                               );
-                              if (index == 4) {
+                              if (index == coun - 1) {
                                 divider = Container();
                               }
                               Widget amountWid = Container();
-                              String date = dateFormat.format(DateTime.parse(
-                                      transactions[index]['date'])) +
+                              String date = dateFormat.format(
+                                      DateTime.parse(mytrans[index]['date'])) +
                                   ' ' +
-                                  timeFormat.format(DateTime.parse(
-                                      transactions[index]['date']));
-                              if (transactions[index]['trans_type'] ==
-                                      'Deposit' ||
-                                  transactions[index]['name'] ==
-                                      'Interest Gain') {
+                                  timeFormat.format(
+                                      DateTime.parse(mytrans[index]['date']));
+                              if (mytrans[index]['trans_type'] == 'Deposit' ||
+                                  mytrans[index]['name'] == 'Interest Gain') {
                                 amountWid = Text(
-                                  '+' +
-                                      humanizeNo(transactions[index]['amount']),
+                                  '+' + humanizeNo(mytrans[index]['amount']),
                                   style: const TextStyle(
                                       color: Color(0xff05F200), fontSize: 13),
                                 );
                               } else {
                                 amountWid = Text(
-                                  '-' +
-                                      humanizeNo(transactions[index]['amount']),
+                                  '-' + humanizeNo(mytrans[index]['amount']),
                                   style: const TextStyle(
                                       color: Colors.red, fontSize: 13),
                                 );
                               }
                               Widget container = Container();
 
-                              if (transactions[index]['trans_type'] !=
+                              if (mytrans[index]['trans_type'] !=
                                       'investment' &&
-                                  transactions[index]['trans_type'] != 'loan') {
-                                String nametext = transactions[index]
-                                        ['transaction_name'] ??
-                                    '';
-                                if (transactions[index]['trans_type'] ==
-                                    'target') {
-                                  nametext = transactions[index]['note'];
+                                  mytrans[index]['note']
+                                          .toString()
+                                          .toLowerCase() !=
+                                      'investment deposit' &&
+                                  mytrans[index]['trans_type'] != 'loan') {
+                                String nametext =
+                                    mytrans[index]['transaction_name'] ?? '';
+                                if (mytrans[index]['trans_type'] == 'target') {
+                                  nametext = mytrans[index]['note'];
                                 }
+
+                                imagecon() {
+                                  if (mytrans[index]['image'] == '' ||
+                                      mytrans[index]['image'] == null) {
+                                    return Container(
+                                      height: 42,
+                                      width: 42,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(42),
+                                        child: Image.asset(
+                                          'assets/images/default_pic.png',
+                                          width: 42,
+                                          cacheHeight: 84,
+                                          cacheWidth: 84,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return Container(
+                                      height: 42,
+                                      width: 42,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(42),
+                                        child: Image.network(
+                                          mytrans[index]['image'],
+                                          width: 42,
+                                          cacheHeight: 84,
+                                          cacheWidth: 84,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+
                                 container = TextButton(
                                   onPressed: () {
                                     setState(() {
@@ -777,10 +975,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                               child: Row(
                                                 children: [
                                                   //placeholder for picture
-                                                  Image.asset(
-                                                    'assets/images/default_pic.png',
-                                                    width: 42,
-                                                  ),
+                                                  imagecon(),
                                                   const SizedBox(
                                                     width: 10,
                                                   ),
@@ -834,8 +1029,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                 );
                               } else {
                                 Widget transpic = Container();
-                                if (transactions[index]['trans_type'] ==
-                                    'loan') {
+                                if (mytrans[index]['trans_type'] == 'loan') {
                                   transpic = SvgPicture.asset(
                                     'assets/svg/trans_loan.svg',
                                     width: 42,
@@ -894,9 +1088,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                                   .start,
                                                           children: [
                                                             Text(
-                                                              transactions[
-                                                                          index]
-                                                                      [
+                                                              mytrans[index][
                                                                       'note'] ??
                                                                   '',
                                                               style: TextStyle(
@@ -954,7 +1146,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                   Widget FundingBal() {
                     if (hidebal == false) {
                       return Text(
-                        'N ${humanizeNo(saving['balance'])}',
+                        'N ${humanizeNo(mysavings['balance'] - mysavings['lin'])}',
                         style:
                             TextStyle(fontSize: 11, color: Color(0xff127422)),
                       );
@@ -1162,6 +1354,32 @@ class _SavingsScreenState extends State<SavingsScreen>
 
                   Widget getCon() {
                     if (_index == 0) {
+                      double height296 = 296;
+                      double height80 = 80;
+                      double height92 = 92;
+                      double height7 = 7;
+                      double font11 = 11.45;
+                      double height10 = 10;
+                      double height15 = 15;
+                      double font15 = 15;
+                      double height20 = 20;
+                      double height30 = 30;
+                      double height65 = 65;
+                      double font13 = 13;
+                      if (myHeight < 580) {
+                        height296 = 296;
+                        height80 = 60;
+                        height92 = 69;
+                        height7 = 5;
+                        font11 = 7.45;
+                        height10 = 5;
+                        height15 = 7.5;
+                        font15 = 9;
+                        height20 = 10;
+                        height30 = 17;
+                        height65 = 45;
+                        font13 = 7.5;
+                      }
                       return Container(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1173,22 +1391,22 @@ class _SavingsScreenState extends State<SavingsScreen>
                                 'Quick Operations',
                                 style: TextStyle(
                                   color: mode.brightText1,
-                                  fontSize: 15,
+                                  fontSize: font15,
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 10,
+                            SizedBox(
+                              height: height10,
                             ),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                               child: SizedBox(
-                                width: 296,
+                                width: height296,
                                 child: Row(
                                   children: [
                                     Container(
-                                      height: 80,
-                                      width: 92,
+                                      height: height80,
+                                      width: height92,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1204,13 +1422,13 @@ class _SavingsScreenState extends State<SavingsScreen>
                                             children: [
                                               SvgPicture.asset(
                                                   'assets/svg/savings_transfer.svg'),
-                                              const SizedBox(
-                                                height: 7,
+                                              SizedBox(
+                                                height: height7,
                                               ),
                                               Text(
                                                 'Transfer',
                                                 style: TextStyle(
-                                                    fontSize: 11.45,
+                                                    fontSize: font11,
                                                     color: mode.brightText1),
                                               )
                                             ],
@@ -1218,12 +1436,12 @@ class _SavingsScreenState extends State<SavingsScreen>
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(
-                                      width: 10,
+                                    SizedBox(
+                                      width: height10,
                                     ),
                                     Container(
-                                      height: 80,
-                                      width: 92,
+                                      height: height80,
+                                      width: height92,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1243,13 +1461,13 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                 'assets/svg/invest_plus.svg',
                                                 color: const Color(0xff23AA59),
                                               ),
-                                              const SizedBox(
-                                                height: 7,
+                                              SizedBox(
+                                                height: height7,
                                               ),
                                               Text(
                                                 'Add money',
                                                 style: TextStyle(
-                                                    fontSize: 11.45,
+                                                    fontSize: font11,
                                                     color: mode.brightText1),
                                               )
                                             ],
@@ -1257,12 +1475,12 @@ class _SavingsScreenState extends State<SavingsScreen>
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(
-                                      width: 10,
+                                    SizedBox(
+                                      width: height10,
                                     ),
                                     Container(
-                                      height: 80,
-                                      width: 92,
+                                      height: height80,
+                                      width: height92,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1280,13 +1498,13 @@ class _SavingsScreenState extends State<SavingsScreen>
                                             children: [
                                               SvgPicture.asset(
                                                   'assets/svg/savings_withdraw.svg'),
-                                              const SizedBox(
-                                                height: 7,
+                                              SizedBox(
+                                                height: height7,
                                               ),
                                               Text(
                                                 'Withdraw',
                                                 style: TextStyle(
-                                                    fontSize: 11.45,
+                                                    fontSize: font11,
                                                     color: mode.brightText1),
                                               )
                                             ],
@@ -1298,8 +1516,8 @@ class _SavingsScreenState extends State<SavingsScreen>
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 20,
+                            SizedBox(
+                              height: height20,
                             ),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
@@ -1311,12 +1529,12 @@ class _SavingsScreenState extends State<SavingsScreen>
                                     'Recent Transactions',
                                     style: TextStyle(
                                       color: mode.brightText1,
-                                      fontSize: 15,
+                                      fontSize: font15,
                                     ),
                                   ),
                                   Container(
-                                    width: 65,
-                                    height: 30,
+                                    width: height65,
+                                    height: height30,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
                                         color: const Color(0xff78e58f)),
@@ -1325,18 +1543,19 @@ class _SavingsScreenState extends State<SavingsScreen>
                                         Navigator.of(context)
                                             .pushNamed('Transactions');
                                       },
-                                      child: const Text(
+                                      child: Text(
                                         'View All',
                                         style: TextStyle(
-                                            fontSize: 13, color: Colors.white),
+                                            fontSize: font13,
+                                            color: Colors.white),
                                       ),
                                     ),
                                   )
                                 ],
                               ),
                             ),
-                            const SizedBox(
-                              height: 10,
+                            SizedBox(
+                              height: height10,
                             ),
                             TransList(),
                           ],
@@ -1490,79 +1709,24 @@ class _SavingsScreenState extends State<SavingsScreen>
                           );
                         } //for tablets
                         else {
-                          return ListView(
+                          return Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               //schedule deductions
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
                                 child: Row(children: [
-                                  Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(0, 0, 5, 0),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: mode.background1,
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      height: 110,
-                                      width: (myWidth - 30) / 2,
-                                      child: SizedBox(
-                                        child: TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              savingsI = 4;
-                                            });
-                                          },
-                                          child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      10, 0, 10, 0),
-                                              child: Row(children: [
-                                                SvgPicture.asset(
-                                                  'assets/svg/schedule.svg',
-                                                  width: 86,
-                                                ),
-                                                const SizedBox(
-                                                  width: 15,
-                                                ),
-                                                SizedBox(
-                                                  width: (myWidth / 2) - 152,
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Text(
-                                                        'Schedule Deductions',
-                                                        style: TextStyle(
-                                                            color: mode
-                                                                .brightText1,
-                                                            fontSize: 20),
-                                                      ),
-                                                      Icon(
-                                                        Icons.arrow_forward_ios,
-                                                        size: 18,
-                                                        color: mode.brightText1,
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ])),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
                                   //funding wallet
                                   Padding(
                                     padding:
-                                        const EdgeInsets.fromLTRB(5, 0, 0, 0),
+                                        const EdgeInsets.fromLTRB(5, 0, 5, 0),
                                     child: Container(
                                       decoration: BoxDecoration(
                                         color: mode.background1,
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       height: 110,
-                                      width: (myWidth - 30) / 2,
+                                      width: (myWidth - 40) / 2,
                                       child: SizedBox(
                                         child: TextButton(
                                           onPressed: null,
@@ -1578,7 +1742,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                   width: 15,
                                                 ),
                                                 SizedBox(
-                                                  width: (myWidth / 2) - 152,
+                                                  width: (myWidth / 2) - 157,
                                                   child: Row(
                                                     mainAxisAlignment:
                                                         MainAxisAlignment
@@ -1624,14 +1788,14 @@ class _SavingsScreenState extends State<SavingsScreen>
                                 //Target Savings
                                 Padding(
                                   padding:
-                                      const EdgeInsets.fromLTRB(0, 0, 5, 0),
+                                      const EdgeInsets.fromLTRB(5, 0, 5, 0),
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: mode.background1,
                                       borderRadius: BorderRadius.circular(10),
                                     ),
                                     height: 110,
-                                    width: (myWidth - 30) / 2,
+                                    width: (myWidth - 40) / 2,
                                     child: SizedBox(
                                       child: TextButton(
                                         onPressed: () {
@@ -1650,7 +1814,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                                 width: 15,
                                               ),
                                               SizedBox(
-                                                width: (myWidth / 2) - 152,
+                                                width: (myWidth / 2) - 157,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -1702,75 +1866,6 @@ class _SavingsScreenState extends State<SavingsScreen>
                                     ),
                                   ),
                                 ),
-                                //elevate plus
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(5, 0, 0, 0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: mode.background1,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    height: 110,
-                                    width: (myWidth - 30) / 2,
-                                    child: SizedBox(
-                                      child: TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            savingsI = 2;
-                                          });
-                                        },
-                                        child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10, 0, 10, 0),
-                                            child: Row(children: [
-                                              SvgPicture.asset(
-                                                  'assets/svg/elevate_plus.svg',
-                                                  width: 86),
-                                              const SizedBox(
-                                                width: 15,
-                                              ),
-                                              SizedBox(
-                                                width: (myWidth / 2) - 152,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Elevate Plus',
-                                                          style: TextStyle(
-                                                              color: mode
-                                                                  .brightText1,
-                                                              fontSize: 20),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 2),
-                                                        Text(
-                                                          'Save up charges from loan repayments',
-                                                          style: TextStyle(
-                                                              color: mode
-                                                                  .brightText1,
-                                                              fontSize: 13),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ])),
-                                      ),
-                                    ),
-                                  ),
-                                ),
                               ]),
                             ],
                           );
@@ -1792,7 +1887,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                     color: mode.background3,
                     child: RefreshIndicator(
                       displacement: 50,
-                      onRefresh: regetdata,
+                      onRefresh: regetdata3,
                       child: SingleChildScrollView(
                         physics: AlwaysScrollableScrollPhysics(),
                         child: Column(
@@ -1887,9 +1982,6 @@ class _SavingsScreenState extends State<SavingsScreen>
                   final myWidth = constraints.maxWidth;
 
                   //building custom widgets
-                  Widget noSavings() {
-                    return Container();
-                  }
 
                   Widget TopCard() {
                     if (myWidth < 768) {

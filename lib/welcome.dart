@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'models/color.dart';
 import 'package:timer_builder/timer_builder.dart';
 import 'models/databaseHelper.dart';
 
@@ -29,6 +27,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Image.asset(
                   'assets/images/first.png',
                   height: myHeight / 100 * 50 - 110,
+                  cacheHeight: ((myHeight / 100 * 50 - 110)*2).floor(),
                 ),
               ),
               const SizedBox(
@@ -90,6 +89,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Image.asset(
                   'assets/images/second.png',
                   height: myHeight / 100 * 50 - 130,
+                  cacheHeight: ((myHeight / 100 * 50 - 130)*2).floor(),
                 ),
               ),
               const SizedBox(
@@ -153,6 +153,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Image.asset(
                   'assets/images/third.png',
                   height: myHeight / 100 * 50 - 130,
+                  cacheHeight: ((myHeight / 100 * 50 - 130)*2).floor(),
                 ),
               ),
               const SizedBox(
@@ -203,7 +204,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
           ),
         ),
       );
-      int view = 1;
       Widget _currentSlide = third;
       return TimerBuilder.periodic(const Duration(seconds: 6),
           builder: (context) {
@@ -238,6 +238,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       Image.asset(
                         'assets/images/circle_icon.png',
                         height: 65,
+                        cacheHeight: 130,
                         fit: BoxFit.fitWidth,
                       ),
                     ],
@@ -264,7 +265,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                 child: Column(
                   children: [
                     SizedBox(
-                      height: (myHeight / 100 * 28) / 2,
+                      height: ((myHeight / 100 * 28) / 2) -20,
                     ),
                     Padding(
                       padding: const EdgeInsets.all(20),

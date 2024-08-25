@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:elevate/home.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:select_form_field/select_form_field.dart';
 import 'models/databaseHelper.dart';
+import 'dart:convert';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -20,35 +25,6 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
-
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
-
-final List<Map<String, dynamic>> doctypes = [
-  {
-    'value': 'PDF',
-    'label': 'PDF',
-  },
-];
-
 
 
 class StatementScreen extends StatefulWidget {
@@ -57,16 +33,32 @@ class StatementScreen extends StatefulWidget {
 }
 
 dynamic mode = mode;
+Widget OverCon = Container();
+Widget loading = Container();
+Widget complete = Container();
+bool down = false;
+String filePath = '';
 
-class _StatementScreenState extends State<StatementScreen> {
+class _StatementScreenState extends State<StatementScreen>
+    with SingleTickerProviderStateMixin {
   dynamic mode = lightmode;
+  DateTime iniselecteddate = DateTime.now();
+  DateTime _selectedDate2 = DateTime.now();
   DateTime _selectedDate = DateTime.now();
-  DateTime _selectedDate2 = DateTime(
-      DateTime.now().year, DateTime.now().month, DateTime.now().day + 1);
 
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
   final howCon = TextEditingController();
+
+  late final AnimationController _controller = AnimationController(
+    duration: const Duration(seconds: 5),
+    vsync: this,
+  )..repeat(reverse: false);
+
+  late final Animation<double> _animation = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.linear,
+  );
 
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -101,7 +93,7 @@ class _StatementScreenState extends State<StatementScreen> {
         },
         context: context,
         initialDate: _selectedDate,
-        firstDate: DateTime(DateTime.now().year - 5),
+        firstDate: DateTime(DateTime.now().year - 10),
         lastDate: DateTime(2101));
     if (picked != null && picked != _selectedDate) {
       setState(() {
@@ -179,27 +171,166 @@ class _StatementScreenState extends State<StatementScreen> {
       });
     }
   }
-  
-  
+
+  Future<String> getDownloadPath() async {
+    Directory? directory;
+    try {
+      if (Platform.isIOS) {
+        directory = await getApplicationDocumentsDirectory();
+      } else {
+        directory = Directory('/storage/emulated/0/Download');
+        // Put file in global download folder, if for an unknown reason it didn't exist, we fallback
+        // ignore: avoid_slow_async_io
+        if (!await directory.exists())
+          directory = await getExternalStorageDirectory();
+      }
+    } catch (err) {
+    }
+    return directory!.path;
+  }
+
+  void getstatement() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      OverCon = loading;
+    });
+    String url = apiUrl + 'request/statement/';
+
+    dynamic token = await DatabaseHelper.instance.getToken();
+
+    Response res2 = await post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'token': token,
+        'start': '${DateFormat('dd-MM-yyyy').format(_selectedDate.toLocal())}',
+        'end': '${DateFormat('dd-MM-yyyy').format(_selectedDate2.toLocal())}',
+      },
+      body: (<String, String>{}),
+    );
+    if (res2.statusCode == 200) {
+      Map result = json.decode(res2.body);
+      if (result['result'] == 'success') {
+        String url = result['url'];
+        HttpClient httpClient = new HttpClient();
+        File file;
+        String dir = await getDownloadPath();
+        filePath = 'account_statement.pdf';
+        filePath = '${dir}/${filePath}';
+
+        var request = await httpClient.getUrl(Uri.parse(url));
+        var response = await request.close();
+        if (response.statusCode == 200) {
+          var bytes = await consolidateHttpClientResponseBytes(response);
+          file = File(filePath);
+          await file.writeAsBytes(bytes);
+        } else
+          filePath = 'Error code: ' + response.statusCode.toString();
+
+
+        setState(() {
+          down = true;
+          OverCon = Container();
+        });
+        Navigator.pop(context);
+
+        regetdata(context, mode);
+      } else {
+        setState(() {
+          OverCon = Container();
+        });
+      }
+    } else {
+      setState(() {
+        OverCon = Container();
+      });
+    }
+  }
 
   void initState() {
     super.initState();
-    regetdata();
+    regetdata(context, mode);
     getMode();
+  }
+
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
+
+   
 
     return Scaffold(
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
       final myHeight = constraints.maxHeight;
       final myWidth = constraints.maxWidth;
 
-      //custom widgets
+       if (down == true) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(
+            myWidth * (15 / 100), 0, myWidth * (15 / 100), 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 8),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth * (70 / 100),
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'saved to ${filePath}',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      setState(() {
+        down = false;
+      });
+    }
 
-      Widget continuebtn;
+      Widget CustomLoader = RotationTransition(
+          turns: _animation,
+          child: Container(
+            child: SvgPicture.asset(
+              'assets/svg/loader_icon.svg',
+              height: 30,
+              width: 40,
+              color: const Color(0xffF6B41A),
+            ),
+          ));
+      loading = Container(
+        height: myHeight - 166,
+        width: myWidth,
+        color: mode.background1,
+        child: Center(
+          child: CustomLoader,
+        ),
+      );
+
+      //custom widgets
 
       Widget greycontinue = TextButton(
         onPressed: null,
@@ -222,7 +353,9 @@ class _StatementScreenState extends State<StatementScreen> {
       );
 
       Widget realcontinue = TextButton(
-        onPressed: null,
+        onPressed: () {
+          getstatement();
+        },
         style: ButtonStyle(
           backgroundColor:
               MaterialStateProperty.all<Color>(const Color(0xff231E54)),
@@ -241,7 +374,14 @@ class _StatementScreenState extends State<StatementScreen> {
         ),
       );
 
-      continuebtn = greycontinue;
+      Widget continuebtn() {
+        if (_selectedDate.compareTo(iniselecteddate) < 0 &&
+            (_selectedDate.compareTo(_selectedDate2) < 0)) {
+          return realcontinue;
+        } else {
+          return greycontinue;
+        }
+      }
 
       //scaffold body starts here
       return Container(
@@ -270,6 +410,9 @@ class _StatementScreenState extends State<StatementScreen> {
                         padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
                         child: TextButton(
                           onPressed: () {
+                            setState(() {
+                              OverCon = Container();
+                            });
                             Navigator.pop(context);
                           },
                           child: Icon(
@@ -308,28 +451,66 @@ class _StatementScreenState extends State<StatementScreen> {
                 )),
               ),
             ),
-            Container(
-              width: myWidth,
-              decoration: BoxDecoration(
-                  color: mode.background1,
-                  borderRadius: BorderRadius.circular(10)),
-              child: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    //fourth
-                    Text(
-                      'Start date',
-                      style: TextStyle(color: mode.brightText1, fontSize: 15),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(
+            Stack(children: [
+              Container(
+                width: myWidth,
+                decoration: BoxDecoration(
+                    color: mode.background1,
+                    borderRadius: BorderRadius.circular(10)),
+                child: Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      //fourth
+                      Text(
+                        'Start date',
+                        style: TextStyle(color: mode.brightText1, fontSize: 15),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                          height: 50,
+                          width: myWidth - 20,
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                                border: Border.all(
+                                    width: 1, color: mode.brightText1)),
+                            child: TextButton(
+                                onPressed: () => _selectDate(context),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          20, 0, 0, 0),
+                                      child: Text(
+                                        '${DateFormat('MMMM d, yyyy').format(_selectedDate.toLocal())}',
+                                        style: TextStyle(
+                                            color: mode.brightText1,
+                                            fontWeight: FontWeight.w400),
+                                      ),
+                                    ),
+                                  ],
+                                )),
+                          )),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      //fifth
+                      Text(
+                        'End date',
+                        style: TextStyle(color: mode.brightText1, fontSize: 15),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
                         height: 50,
                         width: myWidth - 20,
                         child: Container(
@@ -338,7 +519,7 @@ class _StatementScreenState extends State<StatementScreen> {
                               border: Border.all(
                                   width: 1, color: mode.brightText1)),
                           child: TextButton(
-                              onPressed: () => _selectDate(context),
+                              onPressed: () => _selectDate2(context),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
@@ -346,7 +527,7 @@ class _StatementScreenState extends State<StatementScreen> {
                                     padding:
                                         const EdgeInsets.fromLTRB(20, 0, 0, 0),
                                     child: Text(
-                                      '${DateFormat('MMMM d, yyyy').format(_selectedDate.toLocal())}',
+                                      '${DateFormat('MMMM d, yyyy').format(_selectedDate2.toLocal())}',
                                       style: TextStyle(
                                           color: mode.brightText1,
                                           fontWeight: FontWeight.w400),
@@ -354,133 +535,74 @@ class _StatementScreenState extends State<StatementScreen> {
                                   ),
                                 ],
                               )),
-                        )),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    //fifth
-                    Text(
-                      'End date',
-                      style: TextStyle(color: mode.brightText1, fontSize: 15),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(
-                      height: 50,
-                      width: myWidth - 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(5),
-                            border:
-                                Border.all(width: 1, color: mode.brightText1)),
-                        child: TextButton(
-                            onPressed: () => _selectDate2(context),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(20, 0, 0, 0),
-                                  child: Text(
-                                    '${DateFormat('MMMM d, yyyy').format(_selectedDate2.toLocal())}',
-                                    style: TextStyle(
-                                        color: mode.brightText1,
-                                        fontWeight: FontWeight.w400),
-                                  ),
-                                ),
-                              ],
-                            )),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ), //third
-                    Text(
-                      'Statement Format',
-                      style: TextStyle(color: mode.brightText1, fontSize: 15),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(
-                      height: 60,
-                      width: myWidth - 20,
-                      child: SelectFormField(
-                        items: doctypes,
-                        controller: howCon,
-                        type: SelectFormFieldType.dropdown,
-                        decoration: InputDecoration(
-                          filled: true,
-                          alignLabelWithHint: false,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          label: Container(
-                            child: Text(
-                              'Choose Document Format',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: mode.dimText1,
-                              ),
-                            ),
-                          ),
-                          fillColor: mode.selectfieldColor,
-                          focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                  width: 1, color: mode.fieldBorder)),
-                          suffixIcon: const Padding(
-                            padding: EdgeInsets.fromLTRB(10, 17, 0, 0),
-                            child: FaIcon(
-                              FontAwesomeIcons.solidCircle,
-                              size: 7,
-                              color: Color(0xff231E54),
-                            ),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(5),
-                              borderSide: BorderSide(
-                                  width: 1, color: mode.fieldBorder)),
                         ),
-                        style: TextStyle(
-                            color: mode.dimText1,
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Text(
-                      'NOTE:   Statements will be sent to the email used for registering to EA services.',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: mode.brightText1,
-                        fontWeight: FontWeight.w300,
+                      const SizedBox(
+                        height: 10,
+                      ), //third
+                      Text(
+                        'Statement Format',
+                        style: TextStyle(color: mode.brightText1, fontSize: 15),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SizedBox(
-                      width: myWidth - 20,
-                      child: Column(children: [
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        SizedBox(
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Container(
                           height: 50,
                           width: myWidth - 20,
-                          child: realcontinue,
+                          decoration: BoxDecoration(
+                              color: mode.selectfieldColor,
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(
+                                  width: 1, color: mode.fieldBorder)),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                            child: Row(
+                              children: [
+                                Text(
+                                  'PDF',
+                                  style: TextStyle(
+                                      fontSize: 15, color: mode.dimText1),
+                                ),
+                              ],
+                            ),
+                          )),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Text(
+                        'NOTE:   Statements will be sent to the email used for registering to EA services.',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: mode.brightText1,
+                          fontWeight: FontWeight.w300,
                         ),
-                        const SizedBox(
-                          height: 15,
-                        )
-                      ]),
-                    )
-                  ],
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: myWidth - 20,
+                        child: Column(children: [
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          SizedBox(
+                            height: 50,
+                            width: myWidth - 20,
+                            child: continuebtn(),
+                          ),
+                          const SizedBox(
+                            height: 15,
+                          )
+                        ]),
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
+              OverCon
+            ]),
           ]));
     })));
   }

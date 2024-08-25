@@ -1,24 +1,13 @@
-import 'dart:ui';
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'models/color.dart';
-import 'overlay.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:select_form_field/select_form_field.dart';
 import 'models/databaseHelper.dart';
 import 'package:flutter/services.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'humanizeAmount.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:getwidget/getwidget.dart';
 import 'savings.dart';
-import 'models/user.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -114,7 +103,6 @@ class _TransactionsState extends State<Transactions>
     initializeDateFormatting();
     dateFormat = new DateFormat.yMMMMd('en');
     timeFormat = new DateFormat.jm('en');
-    bool loaded = false;
   }
 
   @override
@@ -125,13 +113,10 @@ class _TransactionsState extends State<Transactions>
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
-
     return FutureBuilder(
         future: mgetUser(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData) {
-            User user = snapshot.data['data'];
             dynamic initransactions = snapshot.data['transactions'];
 
             if (loaded == false) {
@@ -285,6 +270,39 @@ class _TransactionsState extends State<Transactions>
                               itemCount: transactions.length,
                               itemBuilder: (context, index) {
                                 Widget amountWid = Container();
+                                imagecon() {
+                                  if (transactions[index]['image'] == '' ||
+                                      transactions[index]['image'] == null) {
+                                    return Container(
+                                      height: 42,
+                                      width: 42,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(42),
+                                        child: Image.asset(
+                                          'assets/images/default_pic.png',
+                                          width: 42,
+                                          cacheHeight: 84,
+                                          cacheWidth: 84,
+                                        ),
+                                      ),
+                                    );
+                                  } else {
+                                    return Container(
+                                      height: 42,
+                                      width: 42,
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(42),
+                                        child: Image.network(
+                                          transactions[index]['image'],
+                                          width: 42,
+                                          cacheHeight: 84,
+                                          cacheWidth: 84,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                }
+
                                 String date = dateFormat.format(DateTime.parse(
                                         transactions[index]['date'])) +
                                     ' ' +
@@ -335,17 +353,21 @@ class _TransactionsState extends State<Transactions>
                                             .toString()
                                             .toLowerCase() !=
                                         'investment' &&
+                                        transactions[index]['note']
+                                            .toString()
+                                            .toLowerCase() !=
+                                        'investment deposit' &&
                                     transactions[index]['trans_type']
                                             .toString()
                                             .toLowerCase() !=
                                         'loan') {
-                                          String nametext = transactions[index]
-                                        ['transaction_name'] ??
-                                    '';
-                                if (transactions[index]['trans_type'] ==
-                                    'target') {
-                                  nametext = transactions[index]['note'];
-                                }
+                                  String nametext = transactions[index]
+                                          ['transaction_name'] ??
+                                      '';
+                                  if (transactions[index]['trans_type'] ==
+                                      'target') {
+                                    nametext = transactions[index]['note'];
+                                  }
                                   container = TextButton(
                                     onPressed: () {
                                       setState(() {
@@ -379,10 +401,7 @@ class _TransactionsState extends State<Transactions>
                                                 child: Row(
                                                   children: [
                                                     //placeholder for picture
-                                                    Image.asset(
-                                                      'assets/images/default_pic.png',
-                                                      width: 42,
-                                                    ),
+                                                    imagecon(),
                                                     const SizedBox(
                                                       width: 10,
                                                     ),

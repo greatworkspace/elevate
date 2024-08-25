@@ -1,4 +1,4 @@
-package com.example.elevate
+package com.ginnsltd.elevate
 
 import io.flutter.embedding.android.FlutterActivity
 

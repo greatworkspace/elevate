@@ -2,7 +2,6 @@ import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'humanizeAmount.dart';
 import 'models/databaseHelper.dart';
@@ -96,12 +95,11 @@ class _PayLoanState extends State<PayLoan> {
     getMode();
     initializeDateFormatting();
     getIncentive();
-    regetdata();
+    regetdata(context, mode);
   }
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
     return Scaffold(
         backgroundColor: mode.background1,
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
@@ -109,66 +107,6 @@ class _PayLoanState extends State<PayLoan> {
           final myWidth = constraints.maxWidth;
           // creating custom widgets
 
-          Widget IncentiveSwitch() {
-            if (incentiveCon.text == 'true') {
-              inivalue = true;
-            } else {
-              inivalue = false;
-            }
-
-            if (mode.name == 'Light') {
-              return Transform.scale(
-                scale: 0.9,
-                child: CupertinoSwitch(
-                  value: inivalue,
-                  onChanged: (value) async {
-                    setState(() {
-                      inivalue = value;
-                    });
-                    if (value == true) {
-                      await DatabaseHelper.instance.setins('true');
-                      setState(() {
-                        incentiveCon.text = 'true';
-                      });
-                    } else {
-                      await DatabaseHelper.instance.setins('false');
-                      setState(() {
-                        incentiveCon.text = 'false';
-                      });
-                    }
-                  },
-                  activeColor: const Color(0xff46A623),
-                  trackColor: const Color(0xffD9D9D9),
-                  thumbColor: mode.thumbColor,
-                ),
-              );
-            } else {
-              return Transform.scale(
-                scale: 0.9,
-                child: CupertinoSwitch(
-                    value: inivalue,
-                    onChanged: (value) async {
-                      setState(() {
-                        inivalue = value;
-                      });
-                      if (value == true) {
-                        await DatabaseHelper.instance.setins('true');
-                        setState(() {
-                          incentiveCon.text = 'true';
-                        });
-                      } else {
-                        await DatabaseHelper.instance.setins('false');
-                        setState(() {
-                          incentiveCon.text = 'false';
-                        });
-                      }
-                    },
-                    activeColor: const Color(0xff46A623),
-                    trackColor: const Color(0xffD9D9D9),
-                    thumbColor: Colors.white),
-              );
-            }
-          }
 
           Widget continuebtn;
 
@@ -197,7 +135,6 @@ class _PayLoanState extends State<PayLoan> {
               Future(() async {
                 User sets = await DatabaseHelper.instance.getUser();
                 String acc = sets.account;
-                print(sets);
                 String from = 'Savings Account / ' + acc;
                 await DatabaseHelper.instance.settrans(
                     from,
@@ -243,6 +180,10 @@ class _PayLoanState extends State<PayLoan> {
                   if ((savings['balance'] - savings['lin']) >
                       loan['next_installment']) {
                     continuebtn = realcontinue;
+                  }
+                  double cardwidth = myWidth - 20;
+                  if (cardwidth > 600) {
+                    cardwidth = 600;
                   }
                   return Container(
                       decoration: BoxDecoration(
@@ -321,14 +262,14 @@ class _PayLoanState extends State<PayLoan> {
                                       children: [
                                         Image.asset(
                                           'assets/images/savings_card.png',
-                                          width: myWidth - 20,
-                                          height: (myWidth - 20) / 3.978,
+                                          width: cardwidth,
+                                          height: (cardwidth) / 3.978,
                                           fit: BoxFit.contain,
                                           filterQuality: FilterQuality.low,
                                         ),
                                         SizedBox(
-                                          width: myWidth - 20,
-                                          height: (myWidth - 20) / 3.978,
+                                          width: cardwidth,
+                                          height: (cardwidth) / 3.978,
                                           child: Padding(
                                             padding: const EdgeInsets.all(10.0),
                                             child: Row(children: [
@@ -354,7 +295,7 @@ class _PayLoanState extends State<PayLoan> {
                                                               FontWeight.bold,
                                                           fontSize: 14)),
                                                   SizedBox(
-                                                    width: myWidth - 108,
+                                                    width: cardwidth - 108,
                                                     child: Row(
                                                       mainAxisSize:
                                                           MainAxisSize.max,
@@ -426,23 +367,7 @@ class _PayLoanState extends State<PayLoan> {
                                         controller: loanAmountCon,
                                         enabled: false,
                                         keyboardType: TextInputType.number,
-                                        onChanged: (value) {
-                                          if (value.length > 0) {
-                                            double inivalue = getNum(value);
-                                            String humanVal =
-                                                humanizeNo(inivalue);
-                                            setState(() {
-                                              loanAmountCon.value =
-                                                  TextEditingValue(
-                                                text: humanVal,
-                                                selection:
-                                                    TextSelection.collapsed(
-                                                        offset:
-                                                            humanVal.length),
-                                              );
-                                            });
-                                          }
-                                        },
+                                        
                                         style: TextStyle(
                                             color: mode.brightText1,
                                             fontSize: 14,
@@ -462,20 +387,6 @@ class _PayLoanState extends State<PayLoan> {
                                     const SizedBox(
                                       height: 10,
                                     ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Add Elevate Plus Incentive',
-                                          style: TextStyle(
-                                            fontSize: 14,
-                                            color: mode.brightText1,
-                                          ),
-                                        ),
-                                        IncentiveSwitch()
-                                      ],
-                                    )
                                   ],
                                 ),
                               ),

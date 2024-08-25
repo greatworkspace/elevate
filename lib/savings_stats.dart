@@ -1,13 +1,11 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:elevate/home.dart';
 import 'package:elevate/humanizeAmount.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'models/databaseHelper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/intl.dart';
-import 'package:select_form_field/select_form_field.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -24,42 +22,8 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
-final List<Map<String, dynamic>> _times = [
-  {
-    'value': 'Daily',
-    'label': 'Daily',
-  },
-  {
-    'value': 'Weekly',
-    'label': 'Weekly',
-  },
-  {
-    'value': 'Monthly',
-    'label': 'Monthly',
-  }
-];
 
 List<Map<String, dynamic>> chartdatas = [
   {
@@ -125,13 +89,9 @@ class _SavingsStatsState extends State<SavingsStats> {
 
     return Scaffold(backgroundColor: mode.background1,
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
-      final myHeight = constraints.maxHeight;
       final myWidth = constraints.maxWidth;
-      double iniwidth;
       if (myWidth > 600) {
-        iniwidth = 600;
       } else {
-        iniwidth = myWidth;
       }
 
       //building custom widgets

@@ -1,9 +1,7 @@
-import 'dart:ui';
 
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'humanizeAmount.dart';
 import 'models/user.dart';
@@ -129,7 +127,6 @@ class _PayInvest2State extends State<PayInvest2>
         });
       }
     } else {
-      print('error');
     }
   }
 
@@ -162,7 +159,6 @@ class _PayInvest2State extends State<PayInvest2>
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
     return Scaffold(
         backgroundColor: mode.background1,
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
@@ -170,66 +166,6 @@ class _PayInvest2State extends State<PayInvest2>
           final myWidth = constraints.maxWidth;
           // creating custom widgets
 
-          Widget IncentiveSwitch() {
-            if (incentiveCon.text == 'true') {
-              inivalue = true;
-            } else {
-              inivalue = false;
-            }
-
-            if (mode.name == 'Light') {
-              return Transform.scale(
-                scale: 0.9,
-                child: CupertinoSwitch(
-                  value: inivalue,
-                  onChanged: (value) async {
-                    setState(() {
-                      inivalue = value;
-                    });
-                    if (value == true) {
-                      await DatabaseHelper.instance.setins('true');
-                      setState(() {
-                        incentiveCon.text = 'true';
-                      });
-                    } else {
-                      await DatabaseHelper.instance.setins('true');
-                      setState(() {
-                        incentiveCon.text = 'false';
-                      });
-                    }
-                  },
-                  activeColor: Color(0xff46A623),
-                  trackColor: Color(0xffD9D9D9),
-                  thumbColor: mode.thumbColor,
-                ),
-              );
-            } else {
-              return Transform.scale(
-                scale: 0.9,
-                child: CupertinoSwitch(
-                    value: inivalue,
-                    onChanged: (value) async {
-                      setState(() {
-                        inivalue = value;
-                      });
-                      if (value == true) {
-                        await DatabaseHelper.instance.setins('true');
-                        setState(() {
-                          incentiveCon.text = 'true';
-                        });
-                      } else {
-                        await DatabaseHelper.instance.setins('false');
-                        setState(() {
-                          incentiveCon.text = 'false';
-                        });
-                      }
-                    },
-                    activeColor: Color(0xff46A623),
-                    trackColor: Color(0xffD9D9D9),
-                    thumbColor: Colors.white),
-              );
-            }
-          }
 
           Widget continuebtn;
 

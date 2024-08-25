@@ -12,16 +12,6 @@ dynamic shakey = KeyClass.shakeKey1;
 
 
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 // ignore: must_be_immutable
 class AddonScreen extends StatefulWidget {
@@ -72,7 +62,7 @@ class _AddonScreenState extends State<AddonScreen>
     await DatabaseHelper.instance.makeded(val);
     String url = apiUrl + 'make/ded/';
       dynamic token = await DatabaseHelper.instance.getToken();
-      Response res2 = await post(
+      await post(
         Uri.parse(url),
         headers: <String, String>{
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -200,95 +190,95 @@ class _AddonScreenState extends State<AddonScreen>
 
                     return Column(children: [
                       //support
-                      Container(
-                        decoration: BoxDecoration(
-                          color: mode.background1,
-                        ),
-                        height: 70,
-                        child: SizedBox(
-                          child: TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pushNamed('Support');
-                            },
-                            child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: Row(children: [
-                                  SvgPicture.asset('assets/svg/livechat.svg'),
-                                  const SizedBox(
-                                    width: 30,
-                                  ),
-                                  SizedBox(
-                                    width: myWidth - 90,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Support Ticket',
-                                          style: TextStyle(
-                                              color: mode.brightText1,
-                                              fontSize: 15),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: mode.brightText1,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ])),
-                          ),
-                        ),
-                      ),
+            //          Container(
+              //          decoration: BoxDecoration(
+                //          color: mode.background1,
+                  //      ),
+                  //      height: 70,
+                //        child: SizedBox(
+         //                 child: TextButton(
+           //                 onPressed: () {
+             //                 Navigator.of(context).pushNamed('Support');
+               //             },
+                 //           child: Padding(
+                   //             padding:
+                     //               const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                       //         child: Row(children: [
+                         //         SvgPicture.asset('assets/svg/livechat.svg'),
+                           //       const SizedBox(
+                            //        width: 30,
+                          //        ),
+                        //          SizedBox(
+                      //              width: myWidth - 90,
+                            //        child: Row(
+                           //           mainAxisAlignment:
+                         //                 MainAxisAlignment.spaceBetween,
+                       //               children: [
+                     //                   Text(
+                   //                       'Support Ticket',
+                 //                         style: TextStyle(
+               //                               color: mode.brightText1,
+             //                                 fontSize: 15),
+           //                             ),
+                                   //     Icon(
+                                 //         Icons.arrow_forward_ios,
+                               //           color: mode.brightText1,
+                             //             size: 18,
+                           //             ),
+                         //             ],
+                       //             ),
+                     //             ),
+                   //             ])),
+                 //         ),
+               //         ),
+             //         ),
 
-                      //credit score
-                      Container(
-                        decoration: BoxDecoration(
-                          color: mode.background1,
-                        ),
-                        height: 70,
-                        child: SizedBox(
-                          child: TextButton(
-                            onPressed: () {
-                              setState(() {
-                                accountI = 9;
-                              });
-                            },
-                            child: Padding(
-                                padding:
-                                    const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                                child: Row(children: [
-                                  SvgPicture.asset(
-                                      'assets/svg/creditscore.svg'),
-                                  const SizedBox(
-                                    width: 30,
-                                  ),
-                                  SizedBox(
-                                    width: myWidth - 90,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'Credit Score',
-                                          style: TextStyle(
-                                              color: mode.brightText1,
-                                              fontSize: 15),
-                                        ),
-                                        Icon(
-                                          Icons.arrow_forward_ios,
-                                          color: mode.brightText1,
-                                          size: 18,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ])),
-                          ),
-                        ),
-                      ),
+  //                    //credit score
+   //                   Container(
+    //                    decoration: BoxDecoration(
+     //                     color: mode.background1,
+      //                  ),
+       //                 height: 70,
+        //                child: SizedBox(
+         //                 child: TextButton(
+          //                  onPressed: () {
+           //                   setState(() {
+            //                    accountI = 9;
+             //                 });
+              //              },
+     //                       child: Padding(
+      //                          padding:
+       //                             const EdgeInsets.fromLTRB(10, 0, 10, 0),
+        //                        child: Row(children: [
+         //                         SvgPicture.asset(
+          //                            'assets/svg/creditscore.svg'),
+           //                       const SizedBox(
+           //                         width: 30,
+      //                            ),
+       //                           SizedBox(
+        //                            width: myWidth - 90,
+         //                           child: Row(
+          //                            mainAxisAlignment:
+           //                               MainAxisAlignment.spaceBetween,
+           //                           children: [
+            //                            Text(
+             //                             'Credit Score',
+              //                            style: TextStyle(
+               //                               color: mode.brightText1,
+                //                              fontSize: 15),
+           //                             ),
+            //                            Icon(
+             //                             Icons.arrow_forward_ios,
+              //                            color: mode.brightText1,
+               //                           size: 18,
+               //                         ),
+        //                              ],
+         //                           ),
+          //                        ),
+        //                        ])),
+       //                   ),
+        //                ),
+         //             ),
 
                       //auto deduction
                       Container(

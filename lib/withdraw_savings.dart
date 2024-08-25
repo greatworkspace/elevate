@@ -66,6 +66,9 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
     }
   }
 
+  String mybank = '';
+  String acctno = '';
+  String name = '';
   void getbank() async {
     dynamic bank = await DatabaseHelper.instance.getBank();
     if (bank['id'] == null || bank['status'] == 'pending') {
@@ -74,6 +77,11 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
         accountI = 3;
       });
       Navigator.pop(context);
+    } else {
+      mybank = bank['bank_name'];
+      acctno = bank['account_number'];
+      User user = await DatabaseHelper.instance.getUser();
+      name = user.firstname + ' ' + user.lastname;
     }
   }
 
@@ -93,50 +101,38 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
           final myWidth = constraints.maxWidth;
           // creating custom widgets
 
-          Widget continuebtn;
-
           Widget greycontinue = TextButton(
             onPressed: null,
-            child: const Text(
-              'Send',
-              style: TextStyle(
-                color: Colors.white,
-              ),
-            ),
             style: ButtonStyle(
               backgroundColor:
                   MaterialStateProperty.all<Color>(const Color(0xff777777)),
               shape: MaterialStateProperty.all(RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.0))),
             ),
-          );
-
-          Widget realcontinue = TextButton(
-            onPressed: () async {
-              String narated = narateCon.text;
-              String totext = 'Damian Marley / Guarantee Trust Bank';
-              if (narated == '' || narated == null) {
-                narated = ' ';
-              }
-              Future(() async {
-                User sets = await DatabaseHelper.instance.getUser();
-                String acc = sets.account;
-                String from = 'Savings Account / ' + acc;
-                await DatabaseHelper.instance.settrans(
-                    'Investment Account / Elevate Alliance',
-                    totext,
-                    amountCon.text,
-                    narated);
-              }).then((value) {
-                Navigator.of(context).pushNamed('EnterPin');
-              });
-            },
             child: const Text(
               'Send',
               style: TextStyle(
                 color: Colors.white,
               ),
             ),
+          );
+
+          Widget realcontinue = TextButton(
+            onPressed: () async {
+              String narated = narateCon.text;
+              String from = 'Savings Account / $name';
+              String totext = '$mybank / $acctno';
+              if (narated == '') {
+                narated = ' ';
+              }
+              Future(() async {
+                await DatabaseHelper.instance
+                    .settrans(from, totext, amountCon.text, narated);
+              }).then((value) {
+                action = 'withdraw';
+                Navigator.of(context).pushNamed('EnterPin');
+              });
+            },
             style: ButtonStyle(
               backgroundColor:
                   MaterialStateProperty.all<Color>(const Color(0xff23AA59)),
@@ -147,11 +143,25 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                   ),
                   borderRadius: BorderRadius.circular(10.0))),
             ),
+            child: const Text(
+              'Send',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
           );
 
-          continuebtn = greycontinue;
-          if (amountCon.text.length >= 3) {
-            continuebtn = realcontinue;
+          Widget continuebtn() {
+            try {
+              getNum(amountCon.text);
+            } catch (e) {
+              return greycontinue;
+            }
+            if (getNum(amountCon.text) >= 1000 && narateCon.text != '') {
+              return realcontinue;
+            } else {
+              return greycontinue;
+            }
           }
 
           //scaffold body starts here
@@ -246,10 +256,31 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                                   width: myWidth - 20,
                                   child: TextField(
                                     controller: amountCon,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [],
+                                    onTapOutside: (event) {
+                                      if (amountCon.text != '') {
+                                        setState(() {
+                                          amountCon.text = humanizeNo(
+                                              getNum(amountCon.text));
+                                        });
+                                      }
+                                    },
+                                    onTap: () {
+                                      setState(() {
+                                        amountCon.value = TextEditingValue(
+                                          text: amountCon.text,
+                                          selection: TextSelection.collapsed(
+                                              offset: amountCon.text.length),
+                                        );
+                                      });
+                                    },
+                                    cursorColor: mode.background1,
                                     onChanged: (value) {
-                                      if (value.isNotEmpty) {
-                                        double inivalue = getNum(value);
-                                        String humanVal = humanizeNo(inivalue);
+                                      if (value.isNotEmpty &&
+                                          !value.contains('.')) {
+                                        dynamic inivalue = getNum(value);
+                                        String humanVal = humanizeNo2(inivalue);
                                         setState(() {
                                           amountCon.value = TextEditingValue(
                                             text: humanVal,
@@ -257,31 +288,58 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                                                 offset: humanVal.length),
                                           );
                                         });
+                                      } else if (value.contains('.')) {
+                                        String newval = '';
+                                        List strs = value.split('.');
+                                        if (strs[1].length > 2) {
+                                          String restred =
+                                              strs[1].substring(0, 2);
+                                          newval = strs[0] + '.' + restred;
+                                        } else {
+                                          newval = value;
+                                        }
+
+                                        setState(() {
+                                          amountCon.value = TextEditingValue(
+                                            text: newval,
+                                            selection: TextSelection.collapsed(
+                                                offset: newval.length),
+                                          );
+                                        });
                                       }
                                     },
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.deny(
-                                          RegExp(" "))
-                                    ],
-                                    obscureText: false,
+                                    style: TextStyle(
+                                        color: mode.brightText1,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w300),
                                     decoration: InputDecoration(
-                                      alignLabelWithHint: false,
-                                      hintStyle: TextStyle(
-                                        color: mode.dimText1,
-                                        fontSize: 15,
+                                      prefixIcon: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.fromLTRB(
+                                                10, 0, 15, 0),
+                                            child: Text(
+                                              'NGN',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                color: mode.dimText1,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
+                                      alignLabelWithHint: false,
                                       focusedBorder: OutlineInputBorder(
                                           borderSide: BorderSide(
-                                              color: mode.fieldBorder)),
+                                              width: 0.8,
+                                              color: mode.brightText1)),
                                       enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          color: mode.fieldBorder,
-                                        ),
-                                      ),
-                                    ),
-                                    style: TextStyle(
-                                      color: mode.brightText1,
-                                      fontSize: 15,
+                                          borderSide: BorderSide(
+                                              color: mode.fieldBorder)),
                                     ),
                                   ),
                                 ),
@@ -312,7 +370,7 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text('Guarantee Trust Bank',
+                                        Text(mybank,
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: mode.dimText1,
@@ -348,7 +406,7 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        Text('0123456789',
+                                        Text(acctno,
                                             style: TextStyle(
                                               fontSize: 15,
                                               color: mode.dimText1,
@@ -377,6 +435,11 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                                       FilteringTextInputFormatter.deny(
                                           RegExp(" "))
                                     ],
+                                    onChanged: (value) {
+                                      setState(() {
+                                        narateCon.text = value;
+                                      });
+                                    },
                                     obscureText: false,
                                     decoration: InputDecoration(
                                       alignLabelWithHint: false,
@@ -408,7 +471,7 @@ class _WithdrawSavingsState extends State<WithdrawSavings> {
                                     SizedBox(
                                       height: 50,
                                       width: myWidth - 20,
-                                      child: continuebtn,
+                                      child: continuebtn(),
                                     ),
                                     const SizedBox(
                                       height: 15,

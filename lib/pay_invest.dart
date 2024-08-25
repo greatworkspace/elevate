@@ -1,18 +1,8 @@
-import 'dart:ui';
 
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'models/color.dart';
-import 'overlay.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:select_form_field/select_form_field.dart';
 
-import 'package:flutter/services.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'models/databaseHelper.dart';
 
@@ -80,7 +70,7 @@ class _PayInvestState extends State<PayInvest> {
 
   void initState() {
     super.initState();
-    regetdata();
+    regetdata(context, mode);
     getMode();
     initializeDateFormatting();
   }

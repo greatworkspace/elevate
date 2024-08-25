@@ -21,27 +21,7 @@ dynamic getKey(key) {
 dynamic shakey = KeyClass.shakeKey1;
 bool loaded = false;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 String accountNo = '012345678';
 
@@ -108,7 +88,7 @@ class _BankDetails2State extends State<BankDetails2>
       dynamic data = json.decode(res2.body);
 
       if (data == 'success') {
-        await regetdata();
+        regetdata(context, mode);
         loader2 = Container();
         setState(() {
           accountI = 3;
@@ -117,7 +97,6 @@ class _BankDetails2State extends State<BankDetails2>
       loader2 = Container();
     } else {
       loader2 = Container();
-      print('error');
     }
   }
 

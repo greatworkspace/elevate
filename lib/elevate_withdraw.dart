@@ -97,27 +97,7 @@ class _WithdrawElevateState extends State<WithdrawElevate> {
       final myWidth = constraints.maxWidth;
       // creating custom widgets
 
-      Widget continuebtn;
 
-      Widget greycontinue = TextButton(
-        onPressed: null,
-        child: const Text(
-          'Next',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(const Color(0xffD9D9D9)),
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Color(0xffD9D9D9),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10.0))),
-        ),
-      );
 
       Widget realcontinue = TextButton(
         onPressed: null,
@@ -135,7 +115,6 @@ class _WithdrawElevateState extends State<WithdrawElevate> {
         ),
       );
 
-      continuebtn = greycontinue;
 
       //scaffold body starts here
       return Container(

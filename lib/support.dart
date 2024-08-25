@@ -94,27 +94,7 @@ class _SupportState extends State<Support> {
       final myWidth = constraints.maxWidth;
       // creating custom widgets
 
-      Widget continuebtn;
 
-      Widget greycontinue = TextButton(
-        onPressed: null,
-        child: const Text(
-          'Submit Ticket',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(const Color(0xffD9D9D9)),
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Color(0xffD9D9D9),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10.0))),
-        ),
-      );
 
       Widget realcontinue = TextButton(
         onPressed: () {
@@ -134,7 +114,6 @@ class _SupportState extends State<Support> {
         ),
       );
 
-      continuebtn = greycontinue;
 
       //scaffold body starts here
       return Container(

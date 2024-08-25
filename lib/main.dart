@@ -12,16 +12,13 @@ import 'package:elevate/withdraw_savings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'edit_target.dart';
+import 'new_pin.dart';
 import 'support.dart';
 import 'welcome.dart';
 import 'home.dart';
 import 'upload_document.dart';
-import 'welcome.dart';
 import 'login.dart';
-import 'package:flutter_splash_screen/flutter_splash_screen.dart';
 import 'create_target.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -29,17 +26,14 @@ import 'apply_savings.dart';
 import 'pay_loan.dart';
 import 'enter_pin.dart';
 import 'pay_invest.dart';
-import 'pay_invest2.dart';
 import 'withdraw_invest.dart';
 import 'elevate_withdraw.dart';
 import 'savings_transfer.dart';
 import 'pay_savings.dart';
 import 'pay_savings2.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'notifications.dart';
 import 'withdraw_target.dart';
 import 'dart:io';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'models/databaseHelper.dart';
 
@@ -92,6 +86,7 @@ class MyApp extends StatelessWidget {
       "WithdrawSavings": (context) => WithdrawSavings(),
       "WithdrawTarget": (context) => WithdrawTarget(),
       "Support": (context) => Support(),
+      "NewPin": (context) => NewPin(),
     };
 
     Widget fakehomeScreen = WelcomeScreen();

@@ -1,3 +1,5 @@
+// ignore_for_file: unused_local_variable, must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -7,7 +9,6 @@ import 'home.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'humanizeAmount.dart';
-import 'models/user.dart';
 
 const apiUrl = 'https://finx.ginnsltd.com/mobile/';
 
@@ -26,6 +27,10 @@ dynamic getKey(key) {
 
 bool loaded = false;
 bool warnText = true;
+dynamic mydata = null;
+dynamic myinvestment = null;
+dynamic myinvestA = null;
+dynamic myactivity = null;
 
 dynamic shakey = KeyClass.shakeKey1;
 
@@ -44,9 +49,10 @@ class InvestmentScreen extends StatefulWidget {
 
 dynamic mode = mode;
 int _index = 0;
-bool _open = false;
 bool investMode = false;
 bool hidebal = false;
+String mystate = 'got';
+bool gotdata = false;
 
 class _InvestmentScreenState extends State<InvestmentScreen>
     with SingleTickerProviderStateMixin {
@@ -82,16 +88,116 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     dynamic got = await DatabaseHelper.instance.getUser();
 
     dynamic investment = await DatabaseHelper.instance.getInvestment();
+    dynamic investA = await DatabaseHelper.instance.getInvestA();
     dynamic activity = await DatabaseHelper.instance.getActivity();
 
-    return {
-      'data': got,
-      'investment': investment,
-      'activity': activity,
-    };
+    if (mystate == 'got') {
+      setState(() {
+        mydata = got;
+        myinvestment = investment;
+        myinvestA = investA;
+        myactivity = activity;
+        gotdata = true;
+      });
+    }
+
+    return (true);
   }
 
   DateFormat dateFormat = DateFormat.yMMMMd();
+
+  Future regetdata3() async {
+    setState(() {
+      mystate = 'getting';
+    });
+    await regetdata2();
+    Future.delayed(Duration(seconds: 2)).then((value) {
+      setState(() {
+        mystate = 'got';
+      });
+    });
+    if (gotstate == 'network') {
+      double myWidth2 = MediaQuery.of(context).size.width;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(myWidth2 / 4, 0, myWidth2 / 4, 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth2 / 2,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Network Error',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      await Future.delayed(Duration(seconds: 5));
+      regetdata(context, mode);
+    }
+    if (gotstate == 'timeout') {
+      double myWidth2 = MediaQuery.of(context).size.width;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        padding: EdgeInsets.zero,
+        behavior: SnackBarBehavior.floating,
+        elevation: 0,
+        margin: EdgeInsets.fromLTRB(myWidth2 / 4, 0, myWidth2 / 4, 30),
+        backgroundColor: Color.fromARGB(150, 128, 128, 128),
+        duration: const Duration(seconds: 4),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+        content: Container(
+          width: myWidth2 / 2,
+          height: 30,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(5),
+            color: mode.floatBg,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'Request Timeout',
+                    style: TextStyle(
+                        color: mode.darkText1,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ));
+      regetdata(context, mode);
+    }
+  }
 
   void initState() {
     super.initState();
@@ -126,11 +232,11 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     return FutureBuilder(
         future: mgetUser(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          if (snapshot.hasData) {
-            User user = snapshot.data['data'];
-            dynamic investments = snapshot.data['investment'];
-            dynamic activities = snapshot.data['activity'];
-            if (investments.length < 1) {
+          if (snapshot.hasData || gotdata) {
+            dynamic investments = myinvestment;
+            dynamic investA = myinvestA;
+            dynamic activities = myactivity;
+            if (investA == 'false') {
               investMode = false;
             } else {
               investMode = true;
@@ -145,6 +251,36 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                     child: LayoutBuilder(builder: (context, constraints) {
                   final myHeight = constraints.maxHeight;
                   final myWidth = constraints.maxWidth;
+
+                  double height296 = 296;
+                  double height80 = 80;
+                  double height92 = 92;
+                  double height7 = 7;
+                  double font11 = 11.45;
+                  double height10 = 10;
+                  double height15 = 15;
+                  double font15 = 15;
+                  double font20 = 18;
+                  double height20 = 20;
+                  double height30 = 30;
+                  double height65 = 65;
+                  double font13 = 13;
+                  if (myHeight < 580) {
+                    height296 = 296;
+                    height80 = 60;
+                    height92 = 69;
+                    height7 = 5;
+                    font11 = 7.45;
+                    height10 = 5;
+                    height15 = 7.5;
+                    font15 = 9;
+                    height20 = 10;
+                    height30 = 17;
+                    height65 = 45;
+                    font13 = 7.5;
+                    font20 = 12;
+                  }
+
                   double iniwidth;
                   if (myWidth > 600) {
                     iniwidth = 600;
@@ -167,7 +303,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   withdrawNo = withdrawNum.toString();
 
                   Widget AccBal() {
-                    if (myWidth < 768) {
+                    if (myWidth < 768 && myHeight >= 580) {
                       if (hidebal == false) {
                         return Row(
                           children: [
@@ -205,12 +341,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                       }
                     } //for tablets
                     else {
+                      double height42 = 42;
+                      double font30 = 30;
+                      if (myHeight < 580) {
+                        height42 = 21;
+                        font30 = 15;
+                      }
                       if (hidebal == false) {
                         return Row(
                           children: [
                             SvgPicture.asset(
                               'assets/svg/naira.svg',
-                              height: 46,
+                              height: height42,
                             ),
                             const SizedBox(
                               width: 7,
@@ -218,7 +360,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                             Text(
                               humanizeNo(mainport),
                               style: TextStyle(
-                                fontSize: 36,
+                                fontSize: font30,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -231,7 +373,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                             Text(
                               '****',
                               style: TextStyle(
-                                fontSize: iniwidth / 15,
+                                fontSize: font30,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -292,7 +434,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   }
 
                   Widget Topcard() {
-                    if (myWidth < 768) {
+                    if (myWidth < 768 && myHeight >= 580) {
                       return Padding(
                           padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                           child: Container(
@@ -303,12 +445,13 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                               borderRadius: BorderRadius.circular(15),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(20,0,20,0),
+                              padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
                               child: Builder(
                                 builder: (context) {
                                   return Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
+                                    mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
                                       Row(
                                         mainAxisAlignment:
@@ -320,26 +463,26 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                                 fontSize: 10,
                                                 color: Colors.white),
                                           ),
-                                          TextButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                investI = 5;
-                                              });
-                                            },
-                                            style: TextButton.styleFrom(
-                                              padding: EdgeInsets.zero,
-                                            ),
-                                            child: Padding(
-                                              padding:
-                                                  const EdgeInsets.fromLTRB(
-                                                      5, 0, 0, 0),
-                                              child: SvgPicture.asset(
-                                                'assets/svg/pie.svg',
-                                                height: myWidth * 7 / 100,
-                                                width: myWidth * 7 / 100,
-                                              ),
-                                            ),
-                                          )
+                                          //            TextButton(
+                                          //            onPressed: () {
+                                          //            setState(() {
+                                          //            investI = 5;
+                                          //        });
+                                          //  },
+                                          //    style: TextButton.styleFrom(
+                                          //       padding: EdgeInsets.zero,
+                                          //             ),
+                                          //           child: Padding(
+                                          //           padding:
+                                          //             const EdgeInsets.fromLTRB(
+                                          //                    5, 0, 0, 0),
+                                          //          child: SvgPicture.asset(
+                                          //          'assets/svg/pie.svg',
+                                          //        height: myWidth * 7 / 100,
+                                          //      width: myWidth * 7 / 100,
+                                          //  ),
+                                          //       ),
+                                          //   )
                                         ],
                                       ),
                                       AccBal(),
@@ -368,7 +511,8 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                               ),
                                               child: Padding(
                                                 padding:
-                                                    const EdgeInsets.fromLTRB(7,0,7,0),
+                                                    const EdgeInsets.fromLTRB(
+                                                        7, 0, 7, 0),
                                                 child: Row(
                                                   children: [
                                                     Text(
@@ -425,7 +569,8 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                               ),
                                               child: Padding(
                                                 padding:
-                                                    const EdgeInsets.fromLTRB(7,0,7,0),
+                                                    const EdgeInsets.fromLTRB(
+                                                        7, 0, 7, 0),
                                                 child: Row(
                                                   children: [
                                                     Text(
@@ -463,237 +608,229 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                           ));
                     } //for tablets
                     else {
-                      return Padding(
-                          padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: Container(
-                            width: myWidth - 20,
-                            height: 140,
-                            decoration: BoxDecoration(
+                      double cardheight = 140;
+                      double height42 = 42;
+                      double font20 = 20;
+                      double font30 = 30;
+                      double height50 = 50;
+                      double height20 = 10;
+                      double height17 = 8.5;
+                      double font13 = 13;
+                      double btnwidth = (((myWidth - 62) * 65 / 100) / 2) - 10;
+                      double btnrowwidth = (myWidth - 62) * 65 / 100;
+                      double outwidth = (myWidth - 62) * 35 / 100;
+                      if (myWidth < 767) {
+                        cardheight = 100;
+                        height42 = 21;
+                        font20 = 10;
+                        font30 = 15;
+                        height50 = 25;
+                        height20 = 10;
+                        height17 = 8.5;
+                        font13 = 7.5;
+                        btnrowwidth = 151.6;
+                        btnwidth = 151.6;
+                        outwidth = myWidth - 62 - 151.6;
+                      }
+                      Widget btnrow(List<Widget> children) {
+                        if (myWidth > 767) {
+                          return Row(
+                            children: children,
+                          );
+                        } else {
+                          return Column(
+                            children: children,
+                          );
+                        }
+                      }
+
+                      return (Padding(
+                        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: Container(
+                          width: myWidth - 20,
+                          height: cardheight,
+                          decoration: BoxDecoration(
                               color: const Color(0xff8F6400),
                               borderRadius: BorderRadius.circular(15),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Builder(
-                                builder: (context) {
-                                  return Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                        width: 240,
-                                        child: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            const Text(
-                                              'Total Portfolio',
-                                              style: TextStyle(
-                                                  fontSize: 10,
-                                                  color: Colors.white),
-                                            ),
-                                            SizedBox(width: 10),
-                                            AccBal(),
-                                          ],
-                                        ),
+                              border: Border.all(
+                                  width: 1, color: const Color(0xffFFEFC9))),
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Builder(
+                              builder: (context) {
+                                double iniwidth;
+                                if (myWidth > 600) {
+                                  iniwidth = 600;
+                                } else {
+                                  iniwidth = myWidth;
+                                }
+
+                                return Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      width: outwidth,
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Total Portfolio',
+                                            style: TextStyle(
+                                                fontSize: font20,
+                                                color: Color(0xffE7E8EE)),
+                                          ),
+                                          SizedBox(width: 10),
+                                          AccBal()
+                                        ],
                                       ),
-                                      //row for buttons
-                                      Container(
-                                        width: myWidth - 300,
-                                        child: Row(
-                                          children: [
-                                            SizedBox(
-                                              height: 50,
-                                              width:
-                                                  ((myWidth - 300) * 50 / 100) -
-                                                      10,
-                                              child: TextButton(
-                                                onPressed: null,
-                                                style: TextButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              29.87),
-                                                      side: const BorderSide(
-                                                        width: 0.6,
-                                                        color:
-                                                            Color(0xffFFEFC9),
-                                                      )),
-                                                  backgroundColor:
+                                    ),
+                                    Container(
+                                      width: btnrowwidth,
+                                      child: btnrow(
+                                        [
+                                          SizedBox(
+                                            height: height50,
+                                            width: btnwidth,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  color:
                                                       const Color(0xff9A7214),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(7.0),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        'Interest:',
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                        '+',
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                      Text(
-                                                        interestNo,
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 2,
-                                                      ),
-                                                      Text(
-                                                        'at',
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 2,
-                                                      ),
-                                                      Text(
-                                                        percentNo,
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 1,
-                                                      ),
-                                                      Text(
-                                                        '%',
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              width: 20,
-                                            ),
-                                            SizedBox(
-                                              height: 50,
-                                              width:
-                                                  ((myWidth - 300) * 30 / 100) -
-                                                      10,
-                                              child: TextButton(
-                                                onPressed: null,
-                                                style: TextButton.styleFrom(
-                                                  shape: RoundedRectangleBorder(
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              29.87),
-                                                      side: const BorderSide(
-                                                        width: 0.6,
-                                                        color:
-                                                            Color(0xffFFEFC9),
-                                                      )),
-                                                  backgroundColor:
-                                                      const Color(0xff9A7214),
-                                                ),
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.all(7.0),
-                                                  child: Row(
-                                                    children: [
-                                                      Text(
-                                                        'Withdrawals:',
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                      const SizedBox(
-                                                        width: 5,
-                                                      ),
-                                                      Text(
-                                                        withdrawNo,
-                                                        style: TextStyle(
-                                                            fontSize:
-                                                                iniwidth / 42,
-                                                            color: const Color(
-                                                                0xffEEDDEE)),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(
-                                              width:
-                                                  ((myWidth - 300) * 20 / 100),
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
-                                                children: [
-                                                  SizedBox(
-                                                    width: 42,
-                                                    height: 42,
-                                                    child: TextButton(
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          investI = 5;
-                                                        });
-                                                      },
-                                                      style:
-                                                          TextButton.styleFrom(
-                                                        padding:
-                                                            EdgeInsets.zero,
-                                                      ),
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets
-                                                                .fromLTRB(
-                                                                5, 0, 0, 0),
-                                                        child: SvgPicture.asset(
-                                                          'assets/svg/pie.svg',
-                                                          height: 42,
-                                                          width: 42,
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          29.87),
+                                                  border: Border.all(
+                                                      width: 0.6,
+                                                      color:
+                                                          Color(0xffFFEFC9))),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        15, 7, 15, 7),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Interest:',
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffE7E8EE)),
                                                         ),
-                                                      ),
+                                                        const SizedBox(
+                                                          width: 5,
+                                                        ),
+                                                        Text(
+                                                          '+',
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffEEDDEE)),
+                                                        ),
+                                                        Text(
+                                                          interestNo,
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffEEDDEE)),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 2,
+                                                        ),
+                                                        Text(
+                                                          'at',
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffEEDDEE)),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 2,
+                                                        ),
+                                                        Text(
+                                                          percentNo,
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffEEDDEE)),
+                                                        ),
+                                                        const SizedBox(
+                                                          width: 1,
+                                                        ),
+                                                        Text(
+                                                          '%',
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffEEDDEE)),
+                                                        )
+                                                      ],
                                                     ),
-                                                  ),
-                                                ],
+                                                  ],
+                                                ),
                                               ),
-                                            )
-                                          ],
-                                        ),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                            width: height20,
+                                            height: 5,
+                                          ),
+                                          SizedBox(
+                                            height: height50,
+                                            width: btnwidth,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                  color:
+                                                      const Color(0xff9A7214),
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          29.87),
+                                                  border: Border.all(
+                                                      width: 0.6,
+                                                      color:
+                                                          Color(0xffFFEFC9))),
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.fromLTRB(
+                                                        15, 7, 15, 7),
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment
+                                                          .spaceBetween,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Text(
+                                                          'Withdrawals: ${withdrawNo}',
+                                                          style: TextStyle(
+                                                              fontSize: font13,
+                                                              color: const Color(
+                                                                  0xffE0F5E9)),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      //end of buttons
-                                    ],
-                                  );
-                                },
-                              ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
-                          ));
+                          ),
+                        ),
+                      ));
                     }
                   }
 
@@ -741,11 +878,253 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   Widget Portwid() {
                     double portheight = 0;
                     if (myWidth < 768) {
-                      portheight = myHeight - ((myWidth - 20) / 2.263) - 274.2;
-
+                      portheight = myHeight - ((myWidth - 20) / 2.263) - 278.2;
+                      if (myHeight < 580) {
+                        portheight = (myHeight - (myWidth - 20) / 2.263) - 202;
+                      }
                     } else {
-                      portheight = myHeight - 414.2;
+                      portheight = myHeight - 418.2;
                     }
+
+                    Widget activeplans() {
+                      if (investments.length > 0) {
+                        return SizedBox(
+                            width: myWidth - 20,
+                            height: investments.length.toDouble() * 64,
+                            child: ListView.builder(
+                                scrollDirection: Axis.vertical,
+                                itemCount: investments.length,
+                                itemBuilder: (context, index) {
+                                  int tenure = investments[index]["tenure"];
+                                  double interes =
+                                      investments[index]["interest"];
+                                  String nametext =
+                                      'Investment -  ${tenure}months @ ${interes}%';
+                                  String realdate = dateFormat.format(
+                                      DateTime.parse(
+                                          investments[index]['date']));
+                                  String datetxt = 'Due: ${realdate}';
+                                  String amtstr =
+                                      humanizeNo(investments[index]['balance']);
+                                  return Container(
+                                      height: 64,
+                                      width: myWidth - 20,
+                                      color: mode.background1,
+                                      child: Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Row(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.fromLTRB(
+                                                      0, 0, 20, 0),
+                                              child: SvgPicture.asset(
+                                                'assets/svg/naira_plant.svg',
+                                                height: 38,
+                                                width: 38,
+                                              ),
+                                            ),
+                                            Container(
+                                              width: (myWidth - 20) - 78,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      children: [
+                                                        Text(
+                                                          nametext,
+                                                          style: TextStyle(
+                                                            color: mode
+                                                                .brightText1,
+                                                            fontSize: 13,
+                                                          ),
+                                                        ),
+                                                        Text(
+                                                          datetxt,
+                                                          style: TextStyle(
+                                                            color: Color(
+                                                                0xffF6B41A),
+                                                            fontSize: 12,
+                                                          ),
+                                                        )
+                                                      ]),
+                                                  Row(children: [
+                                                    Padding(
+                                                      padding: const EdgeInsets
+                                                          .fromLTRB(
+                                                          01, 0, 2, 0),
+                                                      child: SvgPicture.asset(
+                                                          'assets/svg/naira.svg',
+                                                          color:
+                                                              mode.brightText1,
+                                                          height: 16),
+                                                    ),
+                                                    Text(
+                                                      amtstr,
+                                                      style: TextStyle(
+                                                        color: mode.brightText1,
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.w800,
+                                                      ),
+                                                    )
+                                                  ])
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ));
+                                }));
+                      } else {
+                        return Container(
+                            child: Text('No Active Plans',
+                                style: TextStyle(
+                                  color: mode.brightText1,
+                                )));
+                      }
+                    }
+
+                    Widget activitycon() {
+                      if (activities.length > 0) {
+                        return Container(
+                            height: activities.length.toDouble() * 70,
+                            decoration: BoxDecoration(
+                              color: mode.background2,
+                            ),
+                            child: ListView.builder(
+                                itemCount: activities.length,
+                                itemBuilder: (context, index) {
+                                  String rename = activities[index]['name'];
+                                  String amount =
+                                      humanizeNo(activities[index]['amount']);
+                                  Widget acticon() {
+                                    if (activities[index]['activity_type']
+                                            .toLowerCase() ==
+                                        'invest') {
+                                      return SvgPicture.asset(
+                                        'assets/svg/deposit_arrow.svg',
+                                        width: 47,
+                                        height: 47,
+                                      );
+                                    } else {
+                                      return Transform.rotate(
+                                        angle: 20.3,
+                                        child: SvgPicture.asset(
+                                          'assets/svg/deposit_arrow.svg',
+                                          width: 47,
+                                          height: 47,
+                                        ),
+                                      );
+                                    }
+                                  }
+
+                                  Widget textbdy() {
+                                    if (activities[index]['activity_type']
+                                            .toLowerCase() ==
+                                        'invest') {
+                                      return RichText(
+                                          overflow: TextOverflow.clip,
+                                          text: TextSpan(children: [
+                                            TextSpan(
+                                                text:
+                                                    'You’ve successfully activated ${rename}: ',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontFamily:
+                                                        GoogleFonts.notoSans()
+                                                            .fontFamily,
+                                                    color: mode.brightText1)),
+                                            TextSpan(
+                                                text: 'N ${amount}',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontFamily:
+                                                        GoogleFonts.notoSans()
+                                                            .fontFamily,
+                                                    color: const Color(
+                                                        0xff10B420))),
+                                          ]));
+                                    } else {
+                                      return RichText(
+                                          overflow: TextOverflow.clip,
+                                          text: TextSpan(children: [
+                                            TextSpan(
+                                                text:
+                                                    'You’ve successfully withdrawn ${rename}: ',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontFamily:
+                                                        GoogleFonts.notoSans()
+                                                            .fontFamily,
+                                                    color: mode.brightText1)),
+                                            TextSpan(
+                                                text: 'N ${amount}',
+                                                style: TextStyle(
+                                                    fontSize: 13,
+                                                    fontFamily:
+                                                        GoogleFonts.notoSans()
+                                                            .fontFamily,
+                                                    color: const Color(
+                                                        0xffB41020))),
+                                          ]));
+                                    }
+                                  }
+
+                                  return Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: Row(children: [
+                                          acticon(),
+                                          const SizedBox(
+                                            width: 20,
+                                          ),
+                                          SizedBox(
+                                            width: myWidth - 107,
+                                            child: textbdy(),
+                                          )
+                                        ]),
+                                      ),
+                                      SizedBox(
+                                        width: myWidth - 20,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Container(
+                                              height: 1,
+                                              width: myWidth - 40,
+                                              color: const Color(0xffF0F0F0),
+                                            )
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                }));
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                          child: Container(
+                              child: Text('No Activity Found',
+                                  style: TextStyle(
+                                    color: mode.brightText1,
+                                  ))),
+                        );
+                      }
+                    }
+
                     return SizedBox(
                       height: portheight,
                       child: ListView(
@@ -761,7 +1140,8 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                               'Active Plan(s)',
                               style: TextStyle(
                                 color: mode.brightText1,
-                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                fontSize: font15,
                               ),
                             ),
                           ),
@@ -770,106 +1150,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                           ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                            child: SizedBox(
-                                width: myWidth - 20,
-                                height: investments.length.toDouble() * 64,
-                                child: ListView.builder(
-                                    scrollDirection: Axis.vertical,
-                                    itemCount: investments.length,
-                                    itemBuilder: (context, index) {
-                                      int tenure = investments[index]["tenure"];
-                                      double interes =
-                                          investments[index]["interest"];
-                                      String nametext =
-                                          'Investment -  ${tenure}months @ ${interes}%';
-                                      String realdate = dateFormat.format(
-                                          DateTime.parse(
-                                              investments[index]['date']));
-                                      String datetxt = 'Due: ${realdate}';
-                                      String amtstr = humanizeNo(
-                                          investments[index]['balance']);
-                                      return Container(
-                                          height: 64,
-                                          width: myWidth - 20,
-                                          color: mode.background1,
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                Padding(
-                                                  padding:
-                                                      const EdgeInsets.fromLTRB(
-                                                          0, 0, 20, 0),
-                                                  child: SvgPicture.asset(
-                                                    'assets/svg/naira_plant.svg',
-                                                    height: 38,
-                                                    width: 38,
-                                                  ),
-                                                ),
-                                                Container(
-                                                  width: (myWidth - 20) - 78,
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
-                                                          children: [
-                                                            Text(
-                                                              nametext,
-                                                              style: TextStyle(
-                                                                color: mode
-                                                                    .brightText1,
-                                                                fontSize: 13,
-                                                              ),
-                                                            ),
-                                                            Text(
-                                                              datetxt,
-                                                              style: TextStyle(
-                                                                color: Color(
-                                                                    0xffF6B41A),
-                                                                fontSize: 12,
-                                                              ),
-                                                            )
-                                                          ]),
-                                                      Row(children: [
-                                                        Padding(
-                                                          padding:
-                                                              const EdgeInsets
-                                                                  .fromLTRB(
-                                                                  01, 0, 2, 0),
-                                                          child: SvgPicture.asset(
-                                                              'assets/svg/naira.svg',
-                                                              color: mode
-                                                                  .brightText1,
-                                                              height: 16),
-                                                        ),
-                                                        Text(
-                                                          amtstr,
-                                                          style: TextStyle(
-                                                            color: mode
-                                                                .brightText1,
-                                                            fontSize: 13,
-                                                            fontWeight:
-                                                                FontWeight.w800,
-                                                          ),
-                                                        )
-                                                      ])
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ));
-                                    })),
+                            child: activeplans(),
                           ),
                           SizedBox(height: 20),
 
@@ -877,132 +1158,14 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                             padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
                             child: Text("Activities",
                                 style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: font15,
                                   color: mode.brightText1,
                                   fontWeight: FontWeight.bold,
                                 )),
                           ),
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-                            child: Container(
-                                height: activities.length.toDouble() * 70,
-                                decoration: BoxDecoration(
-                                  color: mode.background2,
-                                ),
-                                child: ListView.builder(
-                                    itemCount: activities.length,
-                                    itemBuilder: (context, index) {
-                                      String rename = activities[index]['name'];
-                                      String amount = humanizeNo(
-                                          activities[index]['amount']);
-                                      Widget acticon() {
-                                        if (activities[index]['activity_type']
-                                                .toLowerCase() ==
-                                            'invest') {
-                                          return SvgPicture.asset(
-                                            'assets/svg/deposit_arrow.svg',
-                                            width: 47,
-                                            height: 47,
-                                          );
-                                        } else {
-                                          return Transform.rotate(
-                                            angle: 20.3,
-                                            child: SvgPicture.asset(
-                                              'assets/svg/deposit_arrow.svg',
-                                              width: 47,
-                                              height: 47,
-                                            ),
-                                          );
-                                        }
-                                      }
-
-                                      Widget textbdy() {
-                                        if (activities[index]['activity_type']
-                                                .toLowerCase() ==
-                                            'invest') {
-                                          return RichText(
-                                              overflow: TextOverflow.clip,
-                                              text: TextSpan(children: [
-                                                TextSpan(
-                                                    text:
-                                                        'You’ve successfully activated ${rename}: ',
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontFamily: GoogleFonts
-                                                                .notoSans()
-                                                            .fontFamily,
-                                                        color:
-                                                            mode.brightText1)),
-                                                TextSpan(
-                                                    text: 'N ${amount}',
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontFamily: GoogleFonts
-                                                                .notoSans()
-                                                            .fontFamily,
-                                                        color: const Color(
-                                                            0xff10B420))),
-                                              ]));
-                                        } else {
-                                          return RichText(
-                                              overflow: TextOverflow.clip,
-                                              text: TextSpan(children: [
-                                                TextSpan(
-                                                    text:
-                                                        'You’ve successfully withdrawn ${rename}: ',
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontFamily: GoogleFonts
-                                                                .notoSans()
-                                                            .fontFamily,
-                                                        color:
-                                                            mode.brightText1)),
-                                                TextSpan(
-                                                    text: 'N ${amount}',
-                                                    style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontFamily: GoogleFonts
-                                                                .notoSans()
-                                                            .fontFamily,
-                                                        color: const Color(
-                                                            0xffB41020))),
-                                              ]));
-                                        }
-                                      }
-
-                                      return Column(
-                                        children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(10),
-                                            child: Row(children: [
-                                              acticon(),
-                                              const SizedBox(
-                                                width: 20,
-                                              ),
-                                              SizedBox(
-                                                width: myWidth - 107,
-                                                child: textbdy(),
-                                              )
-                                            ]),
-                                          ),
-                                          SizedBox(
-                                            width: myWidth - 20,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
-                                              children: [
-                                                Container(
-                                                  height: 1,
-                                                  width: myWidth - 40,
-                                                  color:
-                                                      const Color(0xffF0F0F0),
-                                                )
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    })),
+                            child: activitycon(),
                           )
                         ],
                       ),
@@ -1020,25 +1183,25 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                               padding:
                                   const EdgeInsets.fromLTRB(10, 10, 10, 10),
                               child: Text(
-                                'Quick Operations',
+                                'Quick Operation',
                                 style: TextStyle(
                                   color: mode.brightText1,
-                                  fontSize: 15,
+                                  fontSize: font15,
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 10,
+                            SizedBox(
+                              height: height10,
                             ),
                             Padding(
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                               child: SizedBox(
-                                width: 296,
+                                width: height296,
                                 child: Row(
                                   children: [
                                     Container(
-                                      height: 80,
-                                      width: 92,
+                                      height: height80,
+                                      width: height92,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1062,7 +1225,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                               Text(
                                                 'Add plan',
                                                 style: TextStyle(
-                                                    fontSize: 11.45,
+                                                    fontSize: font11,
                                                     color: mode.brightText1),
                                               )
                                             ],
@@ -1073,40 +1236,40 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                     const SizedBox(
                                       width: 10,
                                     ),
-                                    Container(
-                                      height: 80,
-                                      width: 92,
-                                      decoration: BoxDecoration(
-                                          color: mode.background1,
-                                          borderRadius:
-                                              BorderRadius.circular(4.77)),
-                                      child: TextButton(
-                                        onPressed: () {
-                                          Navigator.of(context)
-                                              .pushNamed('WithdrawInvest');
-                                        },
-                                        child: Padding(
-                                          padding: const EdgeInsets.all(5),
-                                          child: Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              SvgPicture.asset(
-                                                  'assets/svg/savings_withdraw.svg'),
-                                              const SizedBox(
-                                                height: 7,
-                                              ),
-                                              Text(
-                                                'Withdraw',
-                                                style: TextStyle(
-                                                    fontSize: 11.45,
-                                                    color: mode.brightText1),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
+                                    //                      Container(
+                                    //                       height: height80,
+                                    //                      width: height92,
+                                    //                     decoration: BoxDecoration(
+                                    //                        color: mode.background1,
+                                    //                       borderRadius:
+                                    //                          BorderRadius.circular(4.77)),
+                                    //                     child: TextButton(
+                                    //                      onPressed: () {
+                                    //                       Navigator.of(context)
+                                    //                          .pushNamed('WithdrawInvest');
+                                    //                          },
+                                    //                         child: Padding(
+                                    //                          padding: const EdgeInsets.all(5),
+                                    //                         child: Column(
+                                    //                          mainAxisAlignment:
+                                    //                             MainAxisAlignment.center,
+                                    //                        children: [
+                                    //                         SvgPicture.asset(
+                                    //                            'assets/svg/savings_withdraw.svg'),
+                                    //                       const SizedBox(
+                                    //                        height: 7,
+                                    //                    ),
+                                    //                   Text(
+                                    //                    'Withdraw',
+                                    //                     style: TextStyle(
+                                    //                         fontSize: font11,
+                                    //                        color: mode.brightText1),
+                                    //                  )
+                                    //              ],
+                                    //           ),
+                                    //            ),
+                                    //         ),
+                                    //      ),
                                   ],
                                 ),
                               ),
@@ -1243,10 +1406,10 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   return Container(
                     color: mode.background3,
                     child: RefreshIndicator(
-                       displacement: 50,
-                      onRefresh: regetdata,
+                      displacement: 50,
+                      onRefresh: regetdata3,
                       child: SingleChildScrollView(
-                         physics: AlwaysScrollableScrollPhysics(),
+                        physics: AlwaysScrollableScrollPhysics(),
                         child: Container(
                           color: mode.background3,
                           height: myHeight,
@@ -1254,15 +1417,18 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(10, 45, 10, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 45, 10, 0),
                                   child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
                                         'Investment Account',
                                         style: TextStyle(
-                                            fontSize: 15.31, color: mode.brightText1),
+                                            fontSize: 15.31,
+                                            color: mode.brightText1),
                                       ),
                                       SizedBox(
                                         height: 25,
@@ -1276,7 +1442,8 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                                 .pushNamed('Notifications');
                                           },
                                           child: Row(
-                                            mainAxisAlignment: MainAxisAlignment.end,
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
                                             children: [
                                               FaIcon(
                                                 FontAwesomeIcons.bell,
@@ -1301,7 +1468,8 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                 ),
                                 //spend or save
                                 Padding(
-                                  padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(10, 0, 10, 0),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [
@@ -1350,10 +1518,6 @@ class _InvestmentScreenState extends State<InvestmentScreen>
 
                   //warning widget
 
-                  Widget fakeWarn() {
-                    return Container();
-                  }
-
                   Widget TopCard() {
                     if (myWidth < 768) {
                       return (Padding(
@@ -1382,7 +1546,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Text(
-                                      'You don’t have an Investment',
+                                      'You don\'t have an Investment',
                                       style: TextStyle(
                                           fontSize: 15,
                                           color: Color(0xffE0F5E9)),

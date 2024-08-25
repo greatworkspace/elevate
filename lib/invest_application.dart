@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:select_form_field/select_form_field.dart';
 
-import 'package:flutter/cupertino.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'models/databaseHelper.dart';
 
@@ -85,10 +84,6 @@ bool inivalue = false;
 
 class _InvestApplicationState extends State<InvestApplication> {
   dynamic mode = lightmode;
-  DateTime _selectedDate = DateTime.now();
-  DateTime _selectedDate2 = DateTime(
-      DateTime.now().year, DateTime.now().month, DateTime.now().day + 1);
-  DateTime _iniSelectedDate = DateTime.now();
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
   final tenureCon = TextEditingController();
@@ -132,27 +127,7 @@ class _InvestApplicationState extends State<InvestApplication> {
       final myWidth = constraints.maxWidth;
       // creating custom widgets
 
-      Widget continuebtn;
 
-      Widget greycontinue = TextButton(
-        onPressed: null,
-        style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(const Color(0xffD9D9D9)),
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Color(0xffD9D9D9),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10.0))),
-        ),
-        child: const Text(
-          'Send Application',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-      );
 
       Widget realcontinue = TextButton(
         onPressed: null,
@@ -170,7 +145,6 @@ class _InvestApplicationState extends State<InvestApplication> {
         ),
       );
 
-      continuebtn = greycontinue;
 
       //scaffold body starts here
       return Container(

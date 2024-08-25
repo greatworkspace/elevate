@@ -123,6 +123,7 @@ class _WithdrawInvestState extends State<WithdrawInvest> {
 
             User sets = await DatabaseHelper.instance.getUser();
             String acc = sets.account;
+            // ignore: unused_local_variable
             String from = 'Savings Account / ' + acc;
             await DatabaseHelper.instance.settrans(
                 'Investment Account / Elevate Alliance',

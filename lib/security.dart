@@ -1,15 +1,9 @@
-import 'dart:ui';
+// ignore_for_file: must_be_immutable
+
 
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'models/color.dart';
-import 'overlay.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:select_form_field/select_form_field.dart';
 import 'models/databaseHelper.dart';
-import 'package:flutter/services.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -28,27 +22,7 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 
 
@@ -91,7 +65,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
   void initState() {
     super.initState();
-    regetdata();
+    regetdata(context, mode);
     gethidebal();
   }
 
@@ -162,7 +136,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
 
     return Scaffold(
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
-      final myHeight = constraints.maxHeight;
       final myWidth = constraints.maxWidth;
       //scaffold body starts here
       return Container(

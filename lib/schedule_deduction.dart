@@ -1,21 +1,12 @@
-import 'dart:ui';
+// ignore_for_file: must_be_immutable
+
 
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'models/color.dart';
-import 'overlay.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:select_form_field/select_form_field.dart';
 import 'models/databaseHelper.dart';
-import 'package:flutter/services.dart';
-import 'package:iconify_flutter/iconify_flutter.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'humanizeAmount.dart';
-import 'package:dotted_border/dotted_border.dart';
 import 'package:file_picker/file_picker.dart';
 
 class KeyClass {
@@ -128,7 +119,6 @@ class _ScheduleDeductionState extends State<ScheduleDeduction> {
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
     return Scaffold(backgroundColor: mode.background1,
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
       final myHeight = constraints.maxHeight;

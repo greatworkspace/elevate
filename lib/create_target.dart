@@ -9,7 +9,6 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'models/databaseHelper.dart';
 import 'package:http/http.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'home.dart';
 import 'dart:convert';
 
 class KeyClass {
@@ -214,7 +213,7 @@ class _CreateTargetState extends State<CreateTarget>
           OverCon = Correctpin;
         });
 
-        regetdata();
+        regetdata(context, mode);
       } else {
         setState(() {
           OverCon = Failedtrans;

@@ -34,9 +34,7 @@ dynamic getNum(String humanNum) {
 String humanizeNo(dynamic nonHumanNum) {
   String finalString = '';
   //if double
-  bool check = false;
   if (nonHumanNum > 100000) {
-    check = true;
   }
   double decimal = 0;
   if (nonHumanNum.runtimeType == double) {
@@ -87,9 +85,7 @@ String humanizeNo(dynamic nonHumanNum) {
 String humanizeNo2(dynamic nonHumanNum) {
   String finalString = '';
   //if double
-  bool check = false;
   if (nonHumanNum > 100000) {
-    check = true;
   }
   double decimal = 0;
   if (nonHumanNum.runtimeType == double) {
@@ -127,7 +123,6 @@ String humanizeNo2(dynamic nonHumanNum) {
   } else {
     finalString = nonHumanNum.toString();
   }
-  String decimals = decimal.toString();
   finalString = finalString;
   return finalString;
 }

@@ -1,11 +1,11 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:elevate/home.dart';
 import 'package:elevate/humanizeAmount.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'models/databaseHelper.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:flutter/cupertino.dart';
 import 'target_saving.dart';
 
 class KeyClass {
@@ -22,28 +22,6 @@ dynamic getKey(key) {
 }
 
 dynamic shakey = KeyClass.shakeKey1;
-
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
-
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
 
 bool warnText = true;
 
@@ -68,22 +46,16 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
   final modeCon = TextEditingController();
   final hiddenbalCon = TextEditingController();
 
-
-
   Map item = targets.where((element) => element['id'] == targetD).toList()[0];
   DateTime itemenddate = DateTime.now();
 
   void initState() {
     super.initState();
-    DateTime itemedndate = DateFormat('dd-MM-yyyy').parse(item['end']);
   }
 
   @override
   Widget build(BuildContext context) {
     dynamic mode = widget.amode;
-
-    bool inivalue;
-
 
     return Scaffold(
         backgroundColor: mode.background1,
@@ -99,42 +71,6 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
 
           //building custom widgets
           //targets
-          List<Widget> MyTarget() {
-            List<Widget> targetwids = [];
-
-            Widget container = Padding(
-              padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
-              child: TextButton(
-                onPressed: null,
-                child: Container(
-                  height: 76,
-                  width: myWidth - 20,
-                  decoration: BoxDecoration(
-                      color: mode.background2,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(
-                          'assets/svg/target_icon.svg',
-                          height: 56,
-                          width: 56,
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            );
-            targetwids.add(container);
-
-            return targetwids;
-          }
 
           Widget MyTargetActivities() {
             List<Widget> targetwids = [];
@@ -143,6 +79,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                 .toList()[0];
             String transstr = item['trans'];
             if (transstr != '') {
+              // ignore: unused_local_variable
               List trans_id = item['trans'].split(',').map(int.parse).toList();
             }
             List<Map> trans = List.empty();
@@ -245,6 +182,480 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
           }
 
           Map item = targets.elementAt(targetD - 1);
+
+          Widget TopCard() {
+            if (myWidth < 767 && myHeight >= 580) {
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Container(
+                  width: myWidth - 20,
+                  height: (myWidth - 20) / 2.263,
+                  decoration: BoxDecoration(
+                      color: const Color(0xff14684A),
+                      borderRadius: BorderRadius.circular(15),
+                      border:
+                          Border.all(width: 1, color: const Color(0xff579668))),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 7, 20, 7),
+                    child: Builder(
+                      builder: (context) {
+                        double iniwidth;
+                        if (myWidth > 600) {
+                          iniwidth = 600;
+                        } else {
+                          iniwidth = myWidth;
+                        }
+                        double btnWidth = iniwidth * 50 / 100 - 36;
+                        double btnWidth2 = iniwidth * 50 / 100 - 36;
+                        double btnHeight = (iniwidth * 60 / 100) / 7;
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: iniwidth / 30,
+                            ),
+                            Text(
+                              item['name'],
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.white),
+                            ),
+                            const SizedBox(
+                              height: 7,
+                            ),
+                            Row(
+                              children: [
+                                SvgPicture.asset(
+                                  'assets/svg/naira.svg',
+                                  height: myWidth * 7.5 / 100,
+                                  width: myWidth * 7.5 / 100,
+                                ),
+                                const SizedBox(
+                                  width: 5.5,
+                                ),
+                                Text(
+                                  humanizeNo(item['balance']),
+                                  style: TextStyle(
+                                    fontSize: iniwidth / 19,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                )
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            SizedBox(
+                              width: myWidth,
+                              height: 20,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        humanizeNo(item['balance']),
+                                        style: const TextStyle(
+                                            fontSize: 9.5, color: Colors.white),
+                                      ),
+                                      Text(
+                                        humanizeNo(item['target']),
+                                        style: const TextStyle(
+                                          fontSize: 9.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                    height: 4,
+                                    width: myWidth - 62,
+                                    decoration: const BoxDecoration(
+                                        color: Color(0xff5D8C7B)),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          height: 5,
+                                          width: (item['balance'] /
+                                                  item['target']) *
+                                              (myWidth - 62),
+                                          decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(5),
+                                                  bottomRight:
+                                                      Radius.circular(5))),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            //row for buttons
+                            Row(
+                              children: [
+                                SizedBox(
+                                  height: btnHeight,
+                                  width: btnWidth,
+                                  child: TextButton(
+                                    onPressed: null,
+                                    style: TextButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(29.87),
+                                          side: const BorderSide(
+                                            width: 0.6,
+                                            color: Colors.white,
+                                          )),
+                                    ),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(7, 2, 7, 2),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'Interest for 30 days',
+                                            style: TextStyle(
+                                              fontSize: iniwidth / 45,
+                                              fontWeight: FontWeight.w200,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          SvgPicture.asset(
+                                            'assets/svg/naira.svg',
+                                            height: iniwidth / 31.5,
+                                          ),
+                                          const SizedBox(
+                                            width: 2,
+                                          ),
+                                          Text(
+                                            humanizeNo(item['balance'] *
+                                                (item['interest'] / 100)),
+                                            style: TextStyle(
+                                                fontSize: iniwidth / 45,
+                                                color: const Color(0xffEEDDEE)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  width: 10,
+                                ),
+                                SizedBox(
+                                  height: btnHeight,
+                                  width: btnWidth2,
+                                  child: TextButton(
+                                    onPressed: null,
+                                    style: TextButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(29.87),
+                                          side: const BorderSide(
+                                            width: 0.6,
+                                            color: Colors.white,
+                                          )),
+                                    ),
+                                    child: Padding(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(7, 2, 7, 2),
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            'End Date:',
+                                            style: TextStyle(
+                                                fontSize: iniwidth / 45,
+                                                color: const Color(0xffEEDDEE)),
+                                          ),
+                                          const SizedBox(
+                                            width: 5,
+                                          ),
+                                          Text(
+                                            '${DateFormat('MMMM d, yyyy').format(itemenddate.toLocal())}',
+                                            style: TextStyle(
+                                                fontSize: iniwidth / 45,
+                                                color: const Color(0xffEEDDEE)),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            //end of buttons
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            } //for tablets
+            else {
+              double cardheight = 140;
+              double btnWidth = 230;
+              double btnWidth2 = 230;
+              double btnHeight = 50;
+              double balwidth = (myWidth - 72) - 460;
+              double height37 = 37;
+              double font25 = 25;
+              double height15 = 15;
+              double font13 = 13;
+              if (myHeight < 580) {
+                cardheight = 100;
+                btnWidth = (myWidth - 72) / 2;
+                btnWidth2 = (myWidth - 72) / 2;
+                btnHeight = 25;
+                balwidth = 0;
+                height37 = 19;
+                font25 = 12.5;
+                height15 = 5;
+                font13 = 6.5;
+              }
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                child: Container(
+                  width: myWidth - 20,
+                  height: cardheight,
+                  decoration: BoxDecoration(
+                      color: const Color(0xff14684A),
+                      borderRadius: BorderRadius.circular(15),
+                      border:
+                          Border.all(width: 1, color: const Color(0xff579668))),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 6, 20, 6),
+                    child: Builder(
+                      builder: (context) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              height: height15,
+                            ),
+                            Text(
+                              item['name'],
+                              style: const TextStyle(
+                                  fontSize: 12, color: Colors.white),
+                            ),
+                            const SizedBox(
+                              height: 5,
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  width: balwidth,
+                                  child: Row(children: [
+                                    SvgPicture.asset(
+                                      'assets/svg/naira.svg',
+                                      height: height37,
+                                      width: height37,
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
+                                    Text(
+                                      humanizeNo(item['balance']),
+                                      style: TextStyle(
+                                        fontSize: font25,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ]),
+                                ),
+                                //row for buttons
+                                Row(
+                                  children: [
+                                    SizedBox(
+                                      height: btnHeight,
+                                      width: btnWidth,
+                                      child: TextButton(
+                                        onPressed: null,
+                                        style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(29.87),
+                                              side: const BorderSide(
+                                                width: 0.6,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              7, 2, 7, 2),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                'Interest for 30 days',
+                                                style: TextStyle(
+                                                  fontSize: font13,
+                                                  fontWeight: FontWeight.w200,
+                                                  color: Colors.white,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              SvgPicture.asset(
+                                                'assets/svg/naira.svg',
+                                                height: height15,
+                                              ),
+                                              const SizedBox(
+                                                width: 2,
+                                              ),
+                                              Text(
+                                                humanizeNo(item['balance'] *
+                                                    (item['interest'] / 100)),
+                                                style: TextStyle(
+                                                    fontSize: iniwidth / 45,
+                                                    color: const Color(
+                                                        0xffEEDDEE)),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    SizedBox(
+                                      height: btnHeight,
+                                      width: btnWidth2,
+                                      child: TextButton(
+                                        onPressed: null,
+                                        style: TextButton.styleFrom(
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(29.87),
+                                              side: const BorderSide(
+                                                width: 0.6,
+                                                color: Colors.white,
+                                              )),
+                                        ),
+                                        child: Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              7, 2, 7, 2),
+                                          child: Row(
+                                            children: [
+                                              Text(
+                                                'End Date:',
+                                                style: TextStyle(
+                                                    fontSize: font13,
+                                                    color: const Color(
+                                                        0xffEEDDEE)),
+                                              ),
+                                              const SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text(
+                                                '${DateFormat('MMMM d, yyyy').format(itemenddate.toLocal())}',
+                                                style: TextStyle(
+                                                    fontSize: font13,
+                                                    color: const Color(
+                                                        0xffEEDDEE)),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(
+                              height: 4,
+                            ),
+                            SizedBox(
+                              width: myWidth,
+                              height: 20,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        humanizeNo(item['balance']),
+                                        style: const TextStyle(
+                                            fontSize: 9.5, color: Colors.white),
+                                      ),
+                                      Text(
+                                        humanizeNo(item['target']),
+                                        style: const TextStyle(
+                                          fontSize: 9.5,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  const SizedBox(
+                                    height: 4,
+                                  ),
+                                  Container(
+                                    height: 4,
+                                    width: myWidth - 62,
+                                    decoration: const BoxDecoration(
+                                        color: Color(0xff5D8C7B)),
+                                    child: Row(
+                                      children: [
+                                        Container(
+                                          height: 5,
+                                          width: (item['balance'] /
+                                                  item['target']) *
+                                              (myWidth - 62),
+                                          decoration: const BoxDecoration(
+                                              color: Colors.white,
+                                              borderRadius: BorderRadius.only(
+                                                  topRight: Radius.circular(5),
+                                                  bottomRight:
+                                                      Radius.circular(5))),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+
+                            //end of buttons
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            }
+          }
+
+          double height78 = 78;
+          double height38 = 38;
+          double pad10 = 10;
+          if(myHeight <= 580){
+            height78 = 58;
+          pad10 = 5;
+          }
+
           //scaffold body starts here
           return Container(
               decoration: BoxDecoration(
@@ -321,232 +732,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                     height: 15,
                   ),
                   //top card
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                    child: Container(
-                      width: myWidth - 20,
-                      height: (myWidth - 20) / 2.263,
-                      decoration: BoxDecoration(
-                          color: const Color(0xff14684A),
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                              width: 1, color: const Color(0xff579668))),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 7, 20, 7),
-                        child: Builder(
-                          builder: (context) {
-                            double iniwidth;
-                            if (myWidth > 600) {
-                              iniwidth = 600;
-                            } else {
-                              iniwidth = myWidth;
-                            }
-                            double btnWidth = iniwidth * 50 / 100 - 36;
-                            double btnWidth2 = iniwidth * 50 / 100 - 36;
-                            double btnHeight = (iniwidth * 60 / 100) / 7;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: iniwidth / 30,
-                                ),
-                                Text(
-                                  item['name'],
-                                  style: const TextStyle(
-                                      fontSize: 12, color: Colors.white),
-                                ),
-                                const SizedBox(
-                                  height: 7,
-                                ),
-                                Row(
-                                  children: [
-                                    SvgPicture.asset(
-                                      'assets/svg/naira.svg',
-                                      height: myWidth * 7.5 / 100,
-                                      width: myWidth * 7.5 / 100,
-                                    ),
-                                    const SizedBox(
-                                      width: 5.5,
-                                    ),
-                                    Text(
-                                      humanizeNo(item['balance']),
-                                      style: TextStyle(
-                                        fontSize: iniwidth / 19,
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    )
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                SizedBox(
-                                  width: myWidth,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            humanizeNo(item['balance']),
-                                            style: const TextStyle(
-                                                fontSize: 9.5,
-                                                color: Colors.white),
-                                          ),
-                                          Text(
-                                            humanizeNo(item['target']),
-                                            style: const TextStyle(
-                                              fontSize: 9.5,
-                                              color: Colors.white,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                      const SizedBox(
-                                        height: 4,
-                                      ),
-                                      Container(
-                                        height: 4,
-                                        width: myWidth - 62,
-                                        decoration: const BoxDecoration(
-                                            color: Color(0xff5D8C7B)),
-                                        child: Row(
-                                          children: [
-                                            Container(
-                                              height: 5,
-                                              width: (item['balance'] /
-                                                      item['target']) *
-                                                  (myWidth - 62),
-                                              decoration: const BoxDecoration(
-                                                  color: Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                          topRight:
-                                                              Radius.circular(
-                                                                  5),
-                                                          bottomRight:
-                                                              Radius.circular(
-                                                                  5))),
-                                            ),
-                                          ],
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                //row for buttons
-                                Row(
-                                  children: [
-                                    SizedBox(
-                                      height: btnHeight,
-                                      width: btnWidth,
-                                      child: TextButton(
-                                        onPressed: null,
-                                        style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(29.87),
-                                              side: const BorderSide(
-                                                width: 0.6,
-                                                color: Colors.white,
-                                              )),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              7, 2, 7, 2),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                'Interest for 30 days',
-                                                style: TextStyle(
-                                                  fontSize: iniwidth / 45,
-                                                  fontWeight: FontWeight.w200,
-                                                  color: Colors.white,
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              SvgPicture.asset(
-                                                'assets/svg/naira.svg',
-                                                height: iniwidth / 31.5,
-                                              ),
-                                              const SizedBox(
-                                                width: 2,
-                                              ),
-                                              Text(
-                                                humanizeNo(item['balance'] *(item['interest']/100) ),
-                                                style: TextStyle(
-                                                    fontSize: iniwidth / 45,
-                                                    color: const Color(
-                                                        0xffEEDDEE)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    SizedBox(
-                                      height: btnHeight,
-                                      width: btnWidth2,
-                                      child: TextButton(
-                                        onPressed: null,
-                                        style: TextButton.styleFrom(
-                                          shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(29.87),
-                                              side: const BorderSide(
-                                                width: 0.6,
-                                                color: Colors.white,
-                                              )),
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              7, 2, 7, 2),
-                                          child: Row(
-                                            children: [
-                                              Text(
-                                                'End Date:',
-                                                style: TextStyle(
-                                                    fontSize: iniwidth / 45,
-                                                    color: const Color(
-                                                        0xffEEDDEE)),
-                                              ),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              Text(
-                                                '${DateFormat('MMMM d, yyyy').format(itemenddate.toLocal())}',
-                                                style: TextStyle(
-                                                    fontSize: iniwidth / 45,
-                                                    color: const Color(
-                                                        0xffEEDDEE)),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                //end of buttons
-                              ],
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
+                  TopCard(),
                   //card end
                   const SizedBox(
                     height: 5,
@@ -559,7 +745,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                           child: SizedBox(
-                            height: 78,
+                            height: height78,
                             child: TextButton(
                               onPressed: () {
                                 Navigator.of(context).pushNamed('EditTarget');
@@ -567,21 +753,21 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                               style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero),
                               child: Container(
-                                height: 78,
+                                height: height78,
                                 width: myWidth - 20,
                                 decoration: BoxDecoration(
                                     color: const Color(0xff23AA59),
                                     borderRadius: BorderRadius.circular(10)),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10),
+                                  padding: EdgeInsets.all(pad10),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
                                       SvgPicture.asset(
                                         'assets/svg/create_target.svg',
-                                        height: 38,
-                                        width: 38,
+                                        height: height38,
+                                        width: height38,
                                       ),
                                       const SizedBox(
                                         width: 10,
@@ -638,7 +824,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                           child: SizedBox(
-                            height: 78,
+                            height: height78,
                             child: TextButton(
                               onPressed: () {
                                 setState(() {
@@ -650,21 +836,21 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                               style: TextButton.styleFrom(
                                   padding: EdgeInsets.zero),
                               child: Container(
-                                height: 78,
+                                height: height78,
                                 width: myWidth - 20,
                                 decoration: BoxDecoration(
                                     color: mode.background2,
                                     borderRadius: BorderRadius.circular(10)),
                                 child: Padding(
-                                  padding: const EdgeInsets.all(10),
+                                  padding:  EdgeInsets.all(pad10),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,
                                     children: [
                                       SvgPicture.asset(
                                         'assets/svg/withdraw_arrow.svg',
-                                        height: 38,
-                                        width: 38,
+                                        height: height38,
+                                        width: height38,
                                       ),
                                       const SizedBox(
                                         width: 10,

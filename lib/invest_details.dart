@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -40,8 +42,6 @@ class InvestDetails extends StatefulWidget {
 }
 
 dynamic mode = mode;
-int _index = 0;
-bool _open = false;
 bool investMode = false;
 
 class _InvestDetailsState extends State<InvestDetails> {
@@ -646,17 +646,10 @@ class _InvestDetailsState extends State<InvestDetails> {
     } else {
       return Scaffold(
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
-          final myHeight = constraints.maxHeight;
           final myWidth = constraints.maxWidth;
-          double iniwidth;
           if (myWidth > 600) {
-            iniwidth = 600;
           } else {
-            iniwidth = myWidth;
           }
-          double btnWidth = iniwidth * 55 / 100 - 41;
-          double btnWidth2 = iniwidth * 45 / 100 - 41;
-          double btnHeight = (iniwidth * 60 / 100) / 6;
 
           //building custom widgets
 
@@ -725,14 +718,9 @@ class _InvestDetailsState extends State<InvestDetails> {
                     padding: const EdgeInsets.all(20),
                     child: Builder(
                       builder: (context) {
-                        double iniwidth;
                         if (myWidth > 600) {
-                          iniwidth = 600;
                         } else {
-                          iniwidth = myWidth;
                         }
-                        double btnWidth = iniwidth * 65 / 100 - 40;
-                        double btnHeight = (iniwidth * 60 / 100) / 6;
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,

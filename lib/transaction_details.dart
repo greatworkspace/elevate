@@ -8,8 +8,6 @@ import 'humanizeAmount.dart';
 import 'package:file_picker/file_picker.dart';
 import 'savings.dart';
 import 'package:intl/intl.dart';
-import 'package:intl/date_symbol_data_local.dart';
-import 'models/user.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -118,13 +116,11 @@ class _TransactionDetailsState extends State<TransactionDetails>
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
 
     return FutureBuilder(
         future: mgetUser(),
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData) {
-            User user = snapshot.data['data'];
             dynamic transactions = snapshot.data['transactions'];
 
             return Scaffold(
@@ -184,7 +180,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                     }
                   } else {
                     transtype = item['trans_type'] ?? '';
-                    transbank = item['transaction_bank'] ?? '';
+                    transbank = (item['transaction_bank'] ?? '') + ' / '+ (item['transaction_no'] ?? '');
                     transacc = item['transaction_name'] ?? '';
                   }
 
@@ -471,7 +467,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                         ),
                                       ),
                                       Text(
-                                        'N ' + humanizeNo(0.0),
+                                        'N ' + humanizeNo(item['charge']),
                                         style: TextStyle(
                                           color: mode.brightText1,
                                           fontSize: 15,

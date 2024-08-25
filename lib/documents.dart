@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:elevate/home.dart';
+import 'package:elevate/models/databaseHelper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart';
 import 'package:intl/intl.dart';
 
 class KeyClass {
@@ -18,42 +22,12 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-final List<Map<String, dynamic>> _languages = [
-  {
-    'value': 'English',
-    'label': 'English',
-  },
-  {
-    'value': 'French',
-    'label': 'French',
-  }
-];
 
-final List<Map<String, dynamic>> _modes = [
-  {
-    'value': 'Dark',
-    'label': 'Dark Mode',
-  },
-  {
-    'value': 'Light',
-    'label': 'Light Mode',
-  }
-];
-
-final List<Map<String, dynamic>> documents = [
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '12/07/2023'},
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '12/07/2023'},
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '11/07/2023'},
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '11/07/2023'},
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '08/07/2023'},
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '02/07/2023'},
-  {'name': 'Payment - EA invesments', 'doctype': 'JPEG', 'date': '27/06/2023'},
-];
+List<dynamic> documents = List.empty();
 
 List<dynamic> sorted = [];
 
-
-
+// ignore: must_be_immutable
 class DocumentsScreen extends StatefulWidget {
   DocumentsScreen({
     required this.amode,
@@ -75,14 +49,11 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
   final modeCon = TextEditingController();
   final howCon = TextEditingController();
 
-
-
-
   void getdates() {
     sorted = [];
     List newlist = [];
     for (var idates in documents) {
-      DateTime date = DateFormat('dd/MM/yyyy').parse(idates['date']);
+      DateTime date = DateFormat('yyyy-MM-dd').parse(idates['date']);
       int a = 0;
       for (var item in newlist) {
         if (date == item) {
@@ -103,7 +74,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     for (var item in newlist) {
       List items = [];
       for (var iniitem in documents) {
-        if (DateFormat('dd/MM/yyyy').parse(iniitem['date']) == item) {
+        if (DateFormat('yyyy-MM-dd').parse(iniitem['date']) == item) {
           items.add(iniitem);
         }
       }
@@ -114,9 +85,29 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
     }
   }
 
+  Future getdocuments() async {
+    String url = apiUrl + 'get/proofs/';
+    dynamic token = await DatabaseHelper.instance.getToken();
+    Response res2 = await post(
+      Uri.parse(url),
+      headers: <String, String>{
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'token': token,
+      },
+      body: (<String, String>{}),
+    );
+    if (res2.statusCode == 200) {
+      dynamic data = json.decode(res2.body);
+      setState(() {
+        documents = data['documents'];
+      });
+      getdates();
+    }
+  }
+
   void initState() {
     super.initState();
-    getdates();
+    getdocuments();
   }
 
   @override
@@ -130,50 +121,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
 
       //custom widgets
 
-      // ignore: unused_local_variable
-      Widget continuebtn;
-
-      Widget greycontinue = TextButton(
-        onPressed: null,
-        child: const Text(
-          'Send Request',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(const Color(0xffD9D9D9)),
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Color(0xffD9D9D9),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10.0))),
-        ),
-      );
-
-      Widget realcontinue = TextButton(
-        onPressed: null,
-        child: const Text(
-          'Send Request',
-          style: TextStyle(
-            color: Colors.white,
-          ),
-        ),
-        style: ButtonStyle(
-          backgroundColor:
-              MaterialStateProperty.all<Color>(const Color(0xff231E54)),
-          shape: MaterialStateProperty.all(RoundedRectangleBorder(
-              side: const BorderSide(
-                color: Color(0xff231E54),
-                width: 1,
-              ),
-              borderRadius: BorderRadius.circular(10.0))),
-        ),
-      );
-
-      continuebtn = greycontinue;
+      
 
       //scaffold body starts here
       return Container(
@@ -261,7 +209,7 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
               ),
             ]),
             SizedBox(
-              height: myHeight - 233,
+              height: myHeight - 249,
               child: ListView.builder(
                 itemCount: sorted.length,
                 itemBuilder: (context, index) {
@@ -292,16 +240,17 @@ class _DocumentsScreenState extends State<DocumentsScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Text(
-                                    sitem['name'],
+                                    sitem['purpose'].toUpperCase() ?? '',
                                     style: TextStyle(
-                                      fontSize: 17,
+                                      fontSize: 18,
+
                                       color: mode.brightText1,
                                     ),
                                   ),
                                   Text(
-                                    sitem['doctype'],
+                                    sitem['mtime'] ?? '',
                                     style: TextStyle(
-                                      fontSize: 17,
+                                      fontSize: 14,
                                       color: mode.dimText1,
                                     ),
                                   )

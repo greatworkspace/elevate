@@ -1,9 +1,10 @@
+// ignore_for_file: unnecessary_null_comparison
+
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:select_form_field/select_form_field.dart';
 import 'models/databaseHelper.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'humanizeAmount.dart';
 import 'package:file_picker/file_picker.dart';
@@ -13,7 +14,7 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-@Timeout(Duration(seconds: 1))
+
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
   static const shakeKey2 = Key('__RIKEY2__');
@@ -46,74 +47,7 @@ final List<Map<String, dynamic>> accountTypes = [
 
 dynamic mode = mode;
 
-final List<Map<String, dynamic>> people = [
-  {
-    'id': 1,
-    'name': 'Franklin, O.',
-    'pic': Colors.blue,
-    'accountNumber': '0123456789',
-  },
-  {
-    'id': 2,
-    'name': 'Sandra, A.',
-    'pic': Colors.amber,
-    'accountNumber': '0123456788',
-  },
-  {
-    'id': 3,
-    'name': 'Cathryn, S.',
-    'pic': Colors.teal,
-    'accountNumber': '0123456787',
-  },
-  {
-    'id': 4,
-    'name': 'Philip, B.',
-    'pic': Colors.blueGrey,
-    'accountNumber': '0123456786',
-  },
-  {
-    'id': 5,
-    'name': 'Onome, B.',
-    'pic': Colors.greenAccent,
-    'accountNumber': '0123456785',
-  },
-  {
-    'id': 6,
-    'name': 'Daniel, V.',
-    'pic': Colors.indigo,
-    'accountNumber': '0123456784',
-  },
-  {
-    'id': 7,
-    'name': 'Kunle, A.',
-    'pic': Colors.pinkAccent,
-    'accountNumber': '0123456783',
-  },
-  {
-    'id': 8,
-    'name': 'Johnson, D.',
-    'pic': Colors.limeAccent,
-    'accountNumber': '0123456782',
-  },
-  {
-    'id': 9,
-    'name': 'Kate, G.',
-    'pic': Colors.lightBlueAccent,
-    'accountNumber': '0123456781',
-  },
-  {
-    'id': 10,
-    'name': 'George, W.',
-    'pic': Colors.purple,
-    'accountNumber': '0123456780',
-  },
-  {
-    'id': 11,
-    'name': 'Barack, O.',
-    'pic': Colors.cyanAccent,
-    'accountNumber': '0123456779',
-  },
-];
+List<Map<String, dynamic>> people = List.empty();
 
 class _SavingsTransferState extends State<SavingsTransfer> {
   dynamic mode = lightmode;
@@ -149,6 +83,7 @@ class _SavingsTransferState extends State<SavingsTransfer> {
 
   Future gettags() async {
     List targets = await DatabaseHelper.instance.getTarget();
+    people = await DatabaseHelper.instance.getBeneficiary();
     for (var item in targets) {
       accountTypes.add(
         {
@@ -179,7 +114,7 @@ class _SavingsTransferState extends State<SavingsTransfer> {
     );
     if (res2.statusCode == 200) {
       String account = json.decode(res2.body)['data']['user'];
-      if (account == 'not found') {
+      if (account == 'not found' || account == 'user not found') {
         setState(() {
           err = true;
           AccountText = const Text(
@@ -244,7 +179,7 @@ class _SavingsTransferState extends State<SavingsTransfer> {
 
   void initState() {
     super.initState();
-    regetdata();
+    regetdata(context, mode);
     getMode();
     accountTypes = [
       {
@@ -259,7 +194,6 @@ class _SavingsTransferState extends State<SavingsTransfer> {
 
   @override
   Widget build(BuildContext context) {
-    bool inivalue;
 
     return Scaffold(
         backgroundColor: mode.background1,
@@ -268,7 +202,6 @@ class _SavingsTransferState extends State<SavingsTransfer> {
           final myWidth = constraints.maxWidth;
           // creating custom widgets
 
-          Widget continuebtn;
 
           Widget greycontinue = TextButton(
             onPressed: null,
@@ -342,7 +275,6 @@ class _SavingsTransferState extends State<SavingsTransfer> {
             ),
           );
 
-          continuebtn = greycontinue;
 
           Widget getbtn() {
             if ((accountTCon.text == 'EA Loan Account' ||
@@ -460,80 +392,51 @@ class _SavingsTransferState extends State<SavingsTransfer> {
             AccountW = Container();
           }
 
-          Widget BeneSwitch() {
-            if (beneCon.text == 'true') {
-              inivalue = true;
-            } else {
-              inivalue = false;
-            }
-
-            if (mode.name == 'Light') {
-              return Transform.scale(
-                scale: 0.9,
-                child: CupertinoSwitch(
-                  value: inivalue,
-                  onChanged: (value) {
-                    setState(() {
-                      inivalue = value;
-                      if (inivalue == true) {
-                        beneCon.text = 'true';
-                      } else {
-                        beneCon.text = 'false';
-                      }
-                    });
-                  },
-                  activeColor: const Color(0xff46A623),
-                  trackColor: const Color(0xffD9D9D9),
-                  thumbColor: mode.thumbColor,
-                ),
-              );
-            } else {
-              return Transform.scale(
-                scale: 0.9,
-                child: CupertinoSwitch(
-                    value: inivalue,
-                    onChanged: (value) {
-                      setState(() {
-                        inivalue = value;
-                        if (inivalue == true) {
-                          beneCon.text = 'true';
-                        } else {
-                          beneCon.text = 'false';
-                        }
-                      });
-                    },
-                    activeColor: const Color(0xff46A623),
-                    trackColor: const Color(0xffD9D9D9),
-                    thumbColor: Colors.white),
-              );
-            }
-          }
 
           List<Widget> People() {
             List<Widget> allpeople = [];
             for (var item in people) {
               Widget container = Padding(
                 padding: const EdgeInsets.fromLTRB(0, 0, 10, 0),
-                child: Column(
-                  children: [
-                    Container(
-                      height: 55,
-                      width: 55,
-                      decoration: BoxDecoration(
-                          color: item['pic'],
-                          borderRadius: BorderRadius.circular(55)),
-                    ),
-                    const SizedBox(
-                      height: 7,
-                    ),
-                    Text(
-                      item['name'],
-                      style: TextStyle(
-                        fontSize: 8,
-                        color: mode.brightText1,
+                child: TextButton(
+                  onPressed: () async{
+                   setState(() {
+                      accountTCon.text = 'Elevate Account';
+                    accCon.text = item['account_number'];
+                    loader = realLoader;
+                    
+                   });
+                      err = true;
+                      await getAcc(accCon.text);
+                  },
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: 55,
+                        width: 55,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(55),
+                          child: Image.network(
+                            (item['image'] ?? 'asset/images/default_pic.png'),
+                            width: 55,
+                            height: 55,
+                            fit: BoxFit.cover,
+                            cacheHeight: 55,
+                          ),
+                        ),
                       ),
-                    )
-                  ],
+                      const SizedBox(
+                        height: 7,
+                      ),
+                      Text(
+                        item['name'],
+                        style: TextStyle(
+                          fontSize: 8,
+                          color: mode.brightText1,
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               );
               allpeople.add(container);
@@ -584,20 +487,6 @@ class _SavingsTransferState extends State<SavingsTransfer> {
                   ),
                   const SizedBox(
                     height: 10,
-                  ),
-                  //sixth
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Add to Beneficiaries',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: mode.brightText1,
-                        ),
-                      ),
-                      BeneSwitch()
-                    ],
                   ),
                 ],
               );
@@ -676,7 +565,7 @@ class _SavingsTransferState extends State<SavingsTransfer> {
                         ),
                       ),
                       Container(
-                        height: 105,
+                        height: 109,
                         width: myWidth,
                         decoration: BoxDecoration(
                           color: mode.background2,
@@ -704,7 +593,7 @@ class _SavingsTransferState extends State<SavingsTransfer> {
                       ),
                       Container(
                         width: myWidth,
-                        height: myHeight - 215,
+                        height: myHeight - 219,
                         color: mode.background2,
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(20, 0, 20, 30),
