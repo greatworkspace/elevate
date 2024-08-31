@@ -25,8 +25,6 @@ bool warnText = true;
 
 dynamic shakey = KeyClass.shakeKey1;
 
-
-
 class InvestDetails extends StatefulWidget {
   InvestDetails({
     super.key,
@@ -48,10 +46,6 @@ class _InvestDetailsState extends State<InvestDetails> {
   dynamic mode = lightmode;
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
-
-
-
-
 
   void initState() {
     super.initState();
@@ -76,7 +70,8 @@ class _InvestDetailsState extends State<InvestDetails> {
     }
 
     if (investMode == true) {
-      return Scaffold(backgroundColor: mode.background1,
+      return Scaffold(
+        backgroundColor: mode.background1,
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
           final myHeight = constraints.maxHeight;
           final myWidth = constraints.maxWidth;
@@ -648,8 +643,7 @@ class _InvestDetailsState extends State<InvestDetails> {
         body: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
           final myWidth = constraints.maxWidth;
           if (myWidth > 600) {
-          } else {
-          }
+          } else {}
 
           //building custom widgets
 
@@ -719,8 +713,7 @@ class _InvestDetailsState extends State<InvestDetails> {
                     child: Builder(
                       builder: (context) {
                         if (myWidth > 600) {
-                        } else {
-                        }
+                        } else {}
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.center,

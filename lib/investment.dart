@@ -34,6 +34,8 @@ dynamic myactivity = null;
 
 dynamic shakey = KeyClass.shakeKey1;
 
+List plans = List.empty();
+
 class InvestmentScreen extends StatefulWidget {
   InvestmentScreen({
     required this.amode,
@@ -102,6 +104,115 @@ class _InvestmentScreenState extends State<InvestmentScreen>
     }
 
     return (true);
+  }
+
+  Future mgetData() async {
+    dynamic got = await DatabaseHelper.instance.getPlans();
+    return {
+      'data': got,
+    };
+  }
+
+  Widget PlanWidget(plan, iniwidth) {
+    String full_duration = "";
+    int duration = plan["duration"];
+    if (duration > 1) {
+      full_duration = '${duration} months';
+    } else {
+      full_duration = '${duration} month';
+    }
+    return Column(
+      children: [
+        TextButton(
+          style: TextButton.styleFrom(padding: EdgeInsets.zero),
+          onPressed: () {
+            setState(() {
+              investI = 2;
+              full_plan = plan;
+            });
+          },
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(10),
+              color: mode.background1,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+              child: Row(children: [
+                Image.asset(
+                  'assets/images/icon.png',
+                  height: 90,
+                ),
+                const SizedBox(
+                  width: 15,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      plan["name"],
+                      style: TextStyle(
+                          fontSize: iniwidth / 35, color: mode.brightText1),
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      children: [
+                        Text(
+                          'Up to ',
+                          style: TextStyle(
+                              fontSize: iniwidth / 45, color: mode.dimText1),
+                        ),
+                        Text(
+                          '${plan["interest"]}%',
+                          style: TextStyle(
+                              fontSize: iniwidth / 45, color: mode.brightText1),
+                        ),
+                        Text(
+                          ' returns in ${full_duration}',
+                          style: TextStyle(
+                              fontSize: iniwidth / 45, color: mode.dimText1),
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 5,
+                    ),
+                    Row(
+                      children: [
+                        Container(
+                            height: 26,
+                            width: 78,
+                            decoration: BoxDecoration(
+                                color: const Color(0xffB0EDAB),
+                                borderRadius: BorderRadius.circular(5)),
+                            child: const TextButton(
+                              onPressed: null,
+                              child: Center(
+                                child: Text(
+                                  'Invest Now',
+                                  style: TextStyle(
+                                      color: Colors.black, fontSize: 10),
+                                ),
+                              ),
+                            )),
+                        const SizedBox(
+                          width: 5,
+                        ),
+                      ],
+                    )
+                  ],
+                )
+              ]),
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 15,
+        )
+      ],
+    );
   }
 
   DateFormat dateFormat = DateFormat.yMMMMd();
@@ -296,7 +407,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                   interestNo = humanizeNo(interes);
                   int withdrawNum = 0;
                   for (var act in activities) {
-                    if (act['activity_type'] == 'withdraw') {
+                    if (act['activity_type'].toLowerCase() == 'withdraw') {
                       withdrawNum += 1;
                     }
                   }
@@ -1046,7 +1157,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                                             .fontFamily,
                                                     color: mode.brightText1)),
                                             TextSpan(
-                                                text: 'N ${amount}',
+                                                text: '₦ ${amount}',
                                                 style: TextStyle(
                                                     fontSize: 13,
                                                     fontFamily:
@@ -1069,7 +1180,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                                             .fontFamily,
                                                     color: mode.brightText1)),
                                             TextSpan(
-                                                text: 'N ${amount}',
+                                                text: '₦ ${amount}',
                                                 style: TextStyle(
                                                     fontSize: 13,
                                                     fontFamily:
@@ -1290,113 +1401,39 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                         padding: const EdgeInsets.all(10),
                         child: SizedBox(
                           height: stockconheight,
-                          child: ListView(
-                            children: [
-                              //item 1
-                              TextButton(
-                                style: TextButton.styleFrom(
-                                    padding: EdgeInsets.zero),
-                                onPressed: () {
-                                  setState(() {
-                                    investI = 2;
-                                  });
-                                },
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10),
+                          child: FutureBuilder(
+                              future: mgetData(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<dynamic> snapshot) {
+                                if (snapshot.hasData) {
+                                  plans = snapshot.data['data'];
+                                  return ListView.builder(
+                                    itemCount: plans.length,
+                                    itemBuilder: (context, index) =>
+                                        PlanWidget(plans[index], iniwidth),
+                                  );
+                                } else {
+                                  Widget CustomLoader = RotationTransition(
+                                      turns: _animation,
+                                      child: Container(
+                                        child: SvgPicture.asset(
+                                          'assets/svg/loader_icon.svg',
+                                          height: 30,
+                                          width: 40,
+                                          color: const Color(0xffF6B41A),
+                                        ),
+                                      ));
+                                  Widget loading = Container(
+                                    height: myHeight - 65,
+                                    width: myWidth,
                                     color: mode.background1,
-                                  ),
-                                  child: Padding(
-                                    padding:
-                                        const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                                    child: Row(children: [
-                                      Image.asset(
-                                        'assets/images/icon.png',
-                                        height: 90,
-                                      ),
-                                      const SizedBox(
-                                        width: 15,
-                                      ),
-                                      Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'ELEVATE ALLIANCE INVESTMENT SAVINGS',
-                                            style: TextStyle(
-                                                fontSize: iniwidth / 35,
-                                                color: mode.brightText1),
-                                          ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Text(
-                                                'Up to ',
-                                                style: TextStyle(
-                                                    fontSize: iniwidth / 45,
-                                                    color: mode.dimText1),
-                                              ),
-                                              Text(
-                                                '13%',
-                                                style: TextStyle(
-                                                    fontSize: iniwidth / 45,
-                                                    color: mode.brightText1),
-                                              ),
-                                              Text(
-                                                ' returns in 12 months',
-                                                style: TextStyle(
-                                                    fontSize: iniwidth / 45,
-                                                    color: mode.dimText1),
-                                              )
-                                            ],
-                                          ),
-                                          const SizedBox(
-                                            height: 5,
-                                          ),
-                                          Row(
-                                            children: [
-                                              Container(
-                                                  height: 26,
-                                                  width: 78,
-                                                  decoration: BoxDecoration(
-                                                      color: const Color(
-                                                          0xffB0EDAB),
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              5)),
-                                                  child: const TextButton(
-                                                    onPressed: null,
-                                                    child: Center(
-                                                      child: Text(
-                                                        'Invest Now',
-                                                        style: TextStyle(
-                                                            color: Colors.black,
-                                                            fontSize: 10),
-                                                      ),
-                                                    ),
-                                                  )),
-                                              const SizedBox(
-                                                width: 5,
-                                              ),
-                                              const Text(
-                                                '(with 50+ investors)',
-                                                style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 8,
-                                                    color: Color(0xffF6B41A)),
-                                              )
-                                            ],
-                                          )
-                                        ],
-                                      )
-                                    ]),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                                    child: Center(
+                                      child: CustomLoader,
+                                    ),
+                                  );
+                                  return loading;
+                                }
+                              }),
                         ),
                       );
                     }
@@ -1742,7 +1779,7 @@ class _InvestmentScreenState extends State<InvestmentScreen>
                                           width: 15,
                                         ),
                                         SizedBox(
-                                          width: myWidth - 109,
+                                          width: myWidth - 117,
                                           child: Row(
                                             mainAxisAlignment:
                                                 MainAxisAlignment.spaceBetween,

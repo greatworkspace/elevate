@@ -2,6 +2,8 @@ import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'models/databaseHelper.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -252,13 +254,23 @@ class _PrivacyState extends State<Privacy> {
                                 ),
                               ),
                               TextSpan(
-                                text: 'visit www.elevatemfb.com, ',
+                                text: 'www.elevatemfb.com ',
                                 style: TextStyle(
-                                  fontSize: 15,
                                   fontFamily: GoogleFonts.notoSans().fontFamily,
-                                  color: Color(0xff6A7ECA),
+                                  color: const Color(0xff0080C8),
+                                  fontSize: 12,
                                 ),
-                              )
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    const url = 'https://elevatemfb.com';
+                                    if (await canLaunch(url)) {
+                                      await launch(url);
+                                    } else {
+                                      // Handle error if URL can't be launched
+                                      print('Could not launch $url');
+                                    }
+                                  },
+                              ),
                             ]),
                           ),
                         ],

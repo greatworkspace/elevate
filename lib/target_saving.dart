@@ -23,8 +23,6 @@ dynamic getKey(key) {
 dynamic shakey = KeyClass.shakeKey1;
 List targets = List.empty();
 
-
-
 bool warnText = true;
 int targetD = 0;
 
@@ -96,8 +94,6 @@ class _TargetSavingState extends State<TargetSaving>
   @override
   Widget build(BuildContext context) {
     dynamic mode = widget.amode;
-
-
 
     double interest = 0;
     for (var item in targets) {
@@ -375,7 +371,6 @@ class _TargetSavingState extends State<TargetSaving>
                                           const SizedBox(
                                             width: 5,
                                           ),
-                                          
                                           SvgPicture.asset(
                                             'assets/svg/naira.svg',
                                             height: iniwidth / 31.5,
@@ -485,7 +480,6 @@ class _TargetSavingState extends State<TargetSaving>
                                           const SizedBox(
                                             width: 5,
                                           ),
-                                          
                                           SvgPicture.asset(
                                             'assets/svg/naira.svg',
                                             height: iniwidth / 31.5,
@@ -606,6 +600,11 @@ class _TargetSavingState extends State<TargetSaving>
                         List<Widget> AllTargets() {
                           List<Widget> targetwids = [];
                           for (var item in targets) {
+                            double target_ratio =
+                                (item['balance'] / item['target']);
+                            if (target_ratio > 1) {
+                              target_ratio = 1;
+                            }
                             Widget container = Padding(
                               padding: const EdgeInsets.fromLTRB(0, 5, 0, 5),
                               child: TextButton(
@@ -636,7 +635,7 @@ class _TargetSavingState extends State<TargetSaving>
                                           width: 10,
                                         ),
                                         SizedBox(
-                                          width: myWidth - 109,
+                                          width: myWidth - 112.3,
                                           child: Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -685,8 +684,7 @@ class _TargetSavingState extends State<TargetSaving>
                                                   children: [
                                                     Container(
                                                       height: 5,
-                                                      width: (item['balance'] /
-                                                              item['target']) *
+                                                      width: target_ratio *
                                                           (myWidth - 109),
                                                       decoration: const BoxDecoration(
                                                           color:
@@ -775,7 +773,7 @@ class _TargetSavingState extends State<TargetSaving>
                                               width: 10,
                                             ),
                                             SizedBox(
-                                              width: myWidth - 89.2,
+                                              width: myWidth - 93.2,
                                               child: const Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment

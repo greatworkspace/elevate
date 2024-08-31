@@ -25,84 +25,98 @@ class DatabaseHelper {
       return databaseFactory.openDatabase(
           join(await getDatabasesPath(), 'data.db'),
           options: OpenDatabaseOptions(
-            version: 1,
-            onCreate: (db, version) async {
-              await db.execute(
-                  'CREATE TABLE user(id INTEGER, image TEXT, token TEXT, firstname TEXT, lastname TEXT, address TEXT, gender TEXT, nationality TEXT, phone TEXT, email TEXT, identification TEXT, kin TEXT, marital TEXT, account TEXT, deduction TEXT)');
-              await db.execute(
-                  'CREATE TABLE loan(id INTEGER PRIMARY KEY, name TEXT, email TEXT, principal FLOAT, interest FLOAT, paid FLOAT, balance FLOAT, date DATE, tenure INT, total_loan FLOAT, next_installment FLOAT, next_installment_date TEXT)');
-              await db.execute(
-                  'CREATE TABLE token(id INTEGER PRIMARY KEY, token TEXT)');
-              await db.execute(
-                  'CREATE TABLE officer(id INTEGER PRIMARY KEY, image TEXT, name TEXT, email TEXT, phone_number TEXT, whatsapp_number TEXT)');
-              await db.execute(
-                  'CREATE TABLE saving(id INTEGER PRIMARY KEY, lin FLOAT, balance FLOAT)');
-              await db.execute(
-                  'CREATE TABLE bank(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, bank_name TEXT, status TEXT)');
-              await db.execute(
-                  'CREATE TABLE target(id INTEGER PRIMARY KEY, name TEXT, amountpm FLOAT, howto TEXT, start DATE, end DATE, balance FLOAT, target FLOAT, status TEXT, trans TEXT, interest FLOAT)');
-              await db.execute(
-                  'CREATE TABLE loanP(id INTEGER PRIMARY KEY, status TEXT, name TEXT, tenureMin INTEGER, tenureMax INTEGER, amountMin FLOAT, amountMax FLOAT, interest INTEGER, schedule TEXT, Ppayoff TEXT, access TEXT, description TEXT, Pimage TEXT, Passet TEXT)');
-              await db.execute(
-                  'CREATE TABLE investmentAccount(id INTEGER PRIMARY KEY, account TEXT)');
-              await db.execute(
-                  'CREATE TABLE investment(id INTEGER PRIMARY KEY, balance FLOAT, date DATE, tenure INT, invest_return FLOAT, interest FLOAT)');
-              await db.execute(
-                  'CREATE TABLE activity(id INTEGER, name TEXT, time Date, reference TEXT, amount FLOAT, activity_type TEXT)');
-              await db.execute(
-                  'CREATE TABLE trans(id INTEGER, transaction_no TEXT, transaction_name TEXT, transaction_bank TEXT, note TEXT, date DATE, reference TEXT, amount FLOAT, trans_type TEXT, status TEXT, beginning_balance FLOAT, ending_balance FLOAT, charge FLOAT, image TEXT)');
-              await db.execute(
-                  'CREATE TABLE settings(id INTEGER PRIMARY KEY, mode TEXT, logged TEXT, opened TEXT, autodeduction TEXT, hidebal TEXT, fromText TEXT, toText TEXT, amountText TEXT, narateText TEXT, isincentive TEXT)');
-              await db.execute(
-                  'CREATE TABLE installment(id INTEGER PRIMARY KEY, date DATE, status TEXT, installment_amount FLOAT, beginning_balance FLOAT, ending_balance FLOAT, interest FLOAT, principal FLOAT, loan_id INT, installment_number INT)');
-              await db.execute(
-                  'CREATE TABLE beneficiary(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, image TEXT)');
-              await db.execute(
-                  'CREATE TABLE notification(id INTEGER, body TEXT, feedtype TEXT, mytime TEXT, status TEXT)');
-            },
-          ));
+              version: 1,
+              onCreate: (db, version) async {
+                await db.execute(
+                    'CREATE TABLE user(id INTEGER, image TEXT, token TEXT, firstname TEXT, lastname TEXT, address TEXT, gender TEXT, nationality TEXT, phone TEXT, email TEXT, identification TEXT, kin TEXT, marital TEXT, account TEXT, deduction TEXT)');
+                await db.execute(
+                    'CREATE TABLE loan(id INTEGER PRIMARY KEY, name TEXT, email TEXT, principal FLOAT, interest FLOAT, paid FLOAT, balance FLOAT, date DATE, tenure INT, total_loan FLOAT, next_installment FLOAT, next_installment_date TEXT)');
+                await db.execute(
+                    'CREATE TABLE token(id INTEGER PRIMARY KEY, token TEXT)');
+                await db.execute(
+                    'CREATE TABLE officer(id INTEGER PRIMARY KEY, image TEXT, name TEXT, email TEXT, phone_number TEXT, whatsapp_number TEXT)');
+                await db.execute(
+                    'CREATE TABLE saving(id INTEGER PRIMARY KEY, lin FLOAT, balance FLOAT)');
+                await db.execute(
+                    'CREATE TABLE bank(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, bank_name TEXT, status TEXT)');
+                await db.execute(
+                    'CREATE TABLE target(id INTEGER PRIMARY KEY, name TEXT, amountpm FLOAT, howto TEXT, start DATE, end DATE, balance FLOAT, target FLOAT, status TEXT, trans TEXT, interest FLOAT)');
+                await db.execute(
+                    'CREATE TABLE loanP(id INTEGER PRIMARY KEY, status TEXT, name TEXT, tenureMin INTEGER, tenureMax INTEGER, amountMin FLOAT, amountMax FLOAT, interest INTEGER, schedule TEXT, Ppayoff TEXT, access TEXT, description TEXT, Pimage TEXT, Passet TEXT)');
+                await db.execute(
+                    'CREATE TABLE investmentAccount(id INTEGER PRIMARY KEY, account TEXT)');
+                await db.execute(
+                    'CREATE TABLE investment(id INTEGER PRIMARY KEY, balance FLOAT, date DATE, tenure INT, invest_return FLOAT, interest FLOAT)');
+                await db.execute(
+                    'CREATE TABLE activity(id INTEGER, name TEXT, time Date, reference TEXT, amount FLOAT, activity_type TEXT)');
+                await db.execute(
+                    'CREATE TABLE trans(id INTEGER, transaction_no TEXT, transaction_name TEXT, transaction_bank TEXT, note TEXT, date DATE, reference TEXT, amount FLOAT, trans_type TEXT, status TEXT, beginning_balance FLOAT, ending_balance FLOAT, charge FLOAT, image TEXT)');
+                await db.execute(
+                    'CREATE TABLE settings(id INTEGER PRIMARY KEY, mode TEXT, logged TEXT, opened TEXT, autodeduction TEXT, hidebal TEXT, fromText TEXT, toText TEXT, amountText TEXT, narateText TEXT, isincentive TEXT)');
+                await db.execute(
+                    'CREATE TABLE installment(id INTEGER PRIMARY KEY, date DATE, status TEXT, installment_amount FLOAT, beginning_balance FLOAT, ending_balance FLOAT, interest FLOAT, principal FLOAT, loan_id INT, installment_number INT)');
+                await db.execute(
+                    'CREATE TABLE beneficiary(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, image TEXT)');
+                await db.execute(
+                    'CREATE TABLE notification(id INTEGER, body TEXT, feedtype TEXT, mytime TEXT, status TEXT)');
+                await db.execute(
+                    'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+              },
+              onUpgrade: (db, oldVersion, newVersion) async {
+                if (oldVersion < 2) {
+                  await db.execute(
+                      'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                }
+              }));
     } else {
       Directory(await getDatabasesPath()).create(recursive: true);
       databaseFactory = databaseFactory;
       return databaseFactory.openDatabase(
           join(await getDatabasesPath(), 'data.db'),
           options: OpenDatabaseOptions(
-            version: 1,
-            onCreate: (db, version) async {
-              await db.execute(
-                  'CREATE TABLE user(id INTEGER, image TEXT, token TEXT, firstname TEXT, lastname TEXT, address TEXT, gender TEXT, nationality TEXT, phone TEXT, email TEXT, identification TEXT, kin TEXT, marital TEXT, account TEXT, deduction TEXT)');
-              await db.execute(
-                  'CREATE TABLE loan(id INTEGER PRIMARY KEY, name TEXT, email TEXT, principal FLOAT, interest FLOAT, paid FLOAT, balance FLOAT, date DATE, tenure INT, total_loan FLOAT, next_installment FLOAT, next_installment_date TEXT)');
-              await db.execute(
-                  'CREATE TABLE token(id INTEGER PRIMARY KEY, token TEXT)');
-              await db.execute(
-                  'CREATE TABLE officer(id INTEGER PRIMARY KEY, image TEXT, name TEXT, email TEXT, phone_number TEXT, whatsapp_number TEXT)');
-              await db.execute(
-                  'CREATE TABLE saving(id INTEGER PRIMARY KEY, lin FLOAT, balance FLOAT)');
-              await db.execute(
-                  'CREATE TABLE bank(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, bank_name TEXT, status TEXT)');
-              await db.execute(
-                  'CREATE TABLE target(id INTEGER PRIMARY KEY, name TEXT, amountpm FLOAT, howto TEXT, start DATE, end DATE, balance FLOAT, target FLOAT, status TEXT, trans TEXT, interest FLOAT)');
-              await db.execute(
-                  'CREATE TABLE loanP(id INTEGER PRIMARY KEY, status TEXT, name TEXT, tenureMin INTEGER, tenureMax INTEGER, amountMin FLOAT, amountMax FLOAT, interest INTEGER, schedule TEXT, Ppayoff TEXT, access TEXT, description TEXT, Pimage TEXT, Passet TEXT)');
-              await db.execute(
-                  'CREATE TABLE investmentAccount(id INTEGER PRIMARY KEY, account TEXT)');
-              await db.execute(
-                  'CREATE TABLE investment(id INTEGER PRIMARY KEY, balance FLOAT, date DATE, tenure INT, invest_return FLOAT, interest FLOAT)');
-              await db.execute(
-                  'CREATE TABLE activity(id INTEGER, name TEXT, time Date, reference TEXT, amount FLOAT, activity_type TEXT)');
-              await db.execute(
-                  'CREATE TABLE trans(id INTEGER, transaction_no TEXT, transaction_name TEXT, transaction_bank TEXT, note TEXT, date DATE, reference TEXT, amount FLOAT, trans_type TEXT, status TEXT, beginning_balance FLOAT, ending_balance FLOAT, charge FLOAT, image TEXT)');
-              await db.execute(
-                  'CREATE TABLE settings(id INTEGER PRIMARY KEY, mode TEXT, logged TEXT, opened TEXT, autodeduction TEXT, hidebal TEXT, fromText TEXT, toText TEXT, amountText TEXT, narateText TEXT, isincentive TEXT)');
-              await db.execute(
-                  'CREATE TABLE installment(id INTEGER PRIMARY KEY, date DATE, status TEXT, installment_amount FLOAT, beginning_balance FLOAT, ending_balance FLOAT, interest FLOAT, principal FLOAT, loan_id INT, installment_number INT)');
-              await db.execute(
-                  'CREATE TABLE beneficiary(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, image TEXT)');
+              version: 2,
+              onCreate: (db, version) async {
                 await db.execute(
-                  'CREATE TABLE notification(id INTEGER, body TEXT, feedtype TEXT, mytime TEXT, status TEXT)');
-            },
-          ));
+                    'CREATE TABLE user(id INTEGER, image TEXT, token TEXT, firstname TEXT, lastname TEXT, address TEXT, gender TEXT, nationality TEXT, phone TEXT, email TEXT, identification TEXT, kin TEXT, marital TEXT, account TEXT, deduction TEXT)');
+                await db.execute(
+                    'CREATE TABLE loan(id INTEGER PRIMARY KEY, name TEXT, email TEXT, principal FLOAT, interest FLOAT, paid FLOAT, balance FLOAT, date DATE, tenure INT, total_loan FLOAT, next_installment FLOAT, next_installment_date TEXT)');
+                await db.execute(
+                    'CREATE TABLE token(id INTEGER PRIMARY KEY, token TEXT)');
+                await db.execute(
+                    'CREATE TABLE officer(id INTEGER PRIMARY KEY, image TEXT, name TEXT, email TEXT, phone_number TEXT, whatsapp_number TEXT)');
+                await db.execute(
+                    'CREATE TABLE saving(id INTEGER PRIMARY KEY, lin FLOAT, balance FLOAT)');
+                await db.execute(
+                    'CREATE TABLE bank(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, bank_name TEXT, status TEXT)');
+                await db.execute(
+                    'CREATE TABLE target(id INTEGER PRIMARY KEY, name TEXT, amountpm FLOAT, howto TEXT, start DATE, end DATE, balance FLOAT, target FLOAT, status TEXT, trans TEXT, interest FLOAT)');
+                await db.execute(
+                    'CREATE TABLE loanP(id INTEGER PRIMARY KEY, status TEXT, name TEXT, tenureMin INTEGER, tenureMax INTEGER, amountMin FLOAT, amountMax FLOAT, interest INTEGER, schedule TEXT, Ppayoff TEXT, access TEXT, description TEXT, Pimage TEXT, Passet TEXT)');
+                await db.execute(
+                    'CREATE TABLE investmentAccount(id INTEGER PRIMARY KEY, account TEXT)');
+                await db.execute(
+                    'CREATE TABLE investment(id INTEGER PRIMARY KEY, balance FLOAT, date DATE, tenure INT, invest_return FLOAT, interest FLOAT)');
+                await db.execute(
+                    'CREATE TABLE activity(id INTEGER, name TEXT, time Date, reference TEXT, amount FLOAT, activity_type TEXT)');
+                await db.execute(
+                    'CREATE TABLE trans(id INTEGER, transaction_no TEXT, transaction_name TEXT, transaction_bank TEXT, note TEXT, date DATE, reference TEXT, amount FLOAT, trans_type TEXT, status TEXT, beginning_balance FLOAT, ending_balance FLOAT, charge FLOAT, image TEXT)');
+                await db.execute(
+                    'CREATE TABLE settings(id INTEGER PRIMARY KEY, mode TEXT, logged TEXT, opened TEXT, autodeduction TEXT, hidebal TEXT, fromText TEXT, toText TEXT, amountText TEXT, narateText TEXT, isincentive TEXT)');
+                await db.execute(
+                    'CREATE TABLE installment(id INTEGER PRIMARY KEY, date DATE, status TEXT, installment_amount FLOAT, beginning_balance FLOAT, ending_balance FLOAT, interest FLOAT, principal FLOAT, loan_id INT, installment_number INT)');
+                await db.execute(
+                    'CREATE TABLE beneficiary(id INTEGER PRIMARY KEY, name TEXT, account_number TEXT, image TEXT)');
+                await db.execute(
+                    'CREATE TABLE notification(id INTEGER, body TEXT, feedtype TEXT, mytime TEXT, status TEXT)');
+                await db.execute(
+                    'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+              },
+              onUpgrade: (db, oldVersion, newVersion) async {
+                if (oldVersion < 2) {
+                  await db.execute(
+                      'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                }
+              }));
     }
   }
 
@@ -329,8 +343,6 @@ class DatabaseHelper {
     }
   }
 
-
-
   Future<dynamic> getLoanP() async {
     final db = await database;
     List<Map> loanL = await db.rawQuery('SELECT * FROM loanP');
@@ -342,7 +354,7 @@ class DatabaseHelper {
     }
   }
 
-    insertNoti(List noti) async {
+  insertNoti(List noti) async {
     final db = await database;
     await db.execute('delete from notification');
     final batch = db.batch();
@@ -359,17 +371,43 @@ class DatabaseHelper {
     }
   }
 
+  insertPlans(List plans) async {
+    final db = await database;
+    await db.execute('delete from plans');
+    final batch = db.batch();
+    print(plans);
 
-   notiread(int id) async {
+    if (plans.length > 0) {
+      for (var plan in plans) {
+        batch.insert(
+          'plans',
+          plan,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+      await batch.commit(noResult: true);
+    }
+  }
+
+  Future<dynamic> getPlans() async {
+    final db = await database;
+    List<dynamic> loanL = await db.rawQuery('SELECT * FROM plans');
+    if (loanL.length > 0) {
+      dynamic loan = loanL;
+      return (loan);
+    } else {
+      return List.empty();
+    }
+  }
+
+  notiread(int id) async {
     final db = await database;
 
     await db.update('notification', {'status': 'true'},
         where: 'id = ?', whereArgs: [id]);
   }
 
-
-
-   Future<dynamic> getNoti() async {
+  Future<dynamic> getNoti() async {
     final db = await database;
     List<Map> loanL = await db.rawQuery('SELECT * FROM notification');
     if (loanL.length > 0) {
@@ -418,7 +456,7 @@ class DatabaseHelper {
       dynamic loan = loanL[0];
       return (loan);
     } else {
-      return {'data':'not found'};
+      return {'data': 'not found'};
     }
   }
 
@@ -444,9 +482,7 @@ class DatabaseHelper {
     }
   }
 
-
-
-   insertBeneficiary(dynamic bene) async {
+  insertBeneficiary(dynamic bene) async {
     final db = await database;
     final batch = db.batch();
     await db.execute('delete from beneficiary');
@@ -457,11 +493,10 @@ class DatabaseHelper {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     }
-    
+
     await batch.commit(noResult: true);
     return true;
   }
-
 
   insertInvest(dynamic invest, dynamic activities) async {
     if (invest == null) {
@@ -582,17 +617,20 @@ class DatabaseHelper {
   }
 
   Future<dynamic> makeAll(
-      User user,
-      Map<String, Object?> loan,
-      Map<String, Object?> saving,
-      List<dynamic> trans,
-      dynamic invest,
-      dynamic activities,
-      dynamic bank,
-      dynamic loanP,
-      String investA,
-      dynamic bene,
-      List<dynamic> noti,dynamic officer,) async {
+    User user,
+    Map<String, Object?> loan,
+    Map<String, Object?> saving,
+    List<dynamic> trans,
+    dynamic invest,
+    dynamic activities,
+    dynamic bank,
+    dynamic loanP,
+    String investA,
+    dynamic bene,
+    List<dynamic> noti,
+    dynamic officer,
+    dynamic plans,
+  ) async {
     final db = await database;
 
     final batch = db.batch();
@@ -634,14 +672,14 @@ class DatabaseHelper {
       batch2.insert('bank', bank);
     }
 
-     if (officer['email'] != null) {
+    if (officer['email'] != null) {
       batch2.insert('officer', officer);
     }
 
     batch.execute('delete from saving');
     batch.execute('delete from trans');
 
-     await db.execute('delete from beneficiary');
+    await db.execute('delete from beneficiary');
     for (var investment in bene) {
       batch.insert(
         'beneficiary',
@@ -686,13 +724,25 @@ class DatabaseHelper {
       }
     }
 
-     batch.execute('delete from notification');
+    batch.execute('delete from notification');
 
     if (noti.length > 0) {
       for (var nott in noti) {
         batch2.insert(
           'notification',
           nott,
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    }
+
+    batch.execute('delete from plans');
+
+    if (plans.length > 0) {
+      for (var plan in plans) {
+        batch2.insert(
+          'plans',
+          plan,
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }

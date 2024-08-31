@@ -18,8 +18,6 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-
-
 String accountNo = '012345678';
 
 // ignore: must_be_immutable
@@ -86,7 +84,6 @@ class _BankDetailsState extends State<BankDetails>
 
           Widget continuebtn;
 
-
           Widget realcontinue = TextButton(
             onPressed: () {
               setState(() {
@@ -114,7 +111,6 @@ class _BankDetailsState extends State<BankDetails>
           continuebtn = realcontinue;
           Widget PendingCon = Container();
 
-         
           //scaffold body starts here
           return Container(
               decoration: BoxDecoration(
@@ -195,21 +191,21 @@ class _BankDetailsState extends State<BankDetails>
                         if (bank['id'] == null) {
                           accountI = 4;
                         }
-                        if(bank['status'] == 'pending'){
-                          PendingCon =Container(
-              child: const Text(
-                'Change Pending',
-                style: TextStyle(
-                  color: Color(0xffF6B41A),
-                  fontSize: 15,
-                  fontStyle: FontStyle.italic,
-                ),
-              ),
-            );
+                        if (bank['status'] == 'pending') {
+                          PendingCon = Container(
+                            child: const Text(
+                              'Change Pending',
+                              style: TextStyle(
+                                color: Color(0xffF6B41A),
+                                fontSize: 15,
+                                fontStyle: FontStyle.italic,
+                              ),
+                            ),
+                          );
                         }
                         return Container(
                           width: myWidth,
-                          height: myHeight - 151,
+                          height: myHeight - 153,
                           color: mode.background2,
                           child: Column(
                             children: [
@@ -351,7 +347,6 @@ class _BankDetailsState extends State<BankDetails>
                                           )
                                         ]),
                                       ),
-                                      
                                     ],
                                   ),
                                 ),

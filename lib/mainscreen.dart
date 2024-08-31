@@ -27,8 +27,6 @@ String hello = '';
 dynamic officer = {};
 User? user = null;
 List loanProducts = List.empty();
-final myhomecardcontroller = ItemScrollController();
-ItemPositionsListener myhomecardcontrollerlis = ItemPositionsListener.create();
 double homecardpos = 0.0;
 int homecardindex = 1;
 double cardheight = 0;
@@ -75,6 +73,9 @@ class _MainScreenState extends State<MainScreen>
   dynamic mode = lightmode;
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
+  final ItemScrollController myhomecardcontroller = ItemScrollController();
+  final ItemPositionsListener myhomecardcontrollerlis =
+      ItemPositionsListener.create();
 
   late final AnimationController _controller = AnimationController(
     duration: const Duration(seconds: 5),
@@ -256,6 +257,7 @@ class _MainScreenState extends State<MainScreen>
 
   void dispose() {
     _controller.dispose();
+    super.dispose();
     super.dispose();
   }
 
@@ -1598,7 +1600,7 @@ class _MainScreenState extends State<MainScreen>
                       return SizedBox(
                         width: myWidth - 20,
                         height: (((myWidth - 40) / 2) / 2.33333),
-                        //notifocation listener for first bounce scroll
+                        //notification listener for first bounce scroll
                         child: Row(
                           children: [
                             Padding(
@@ -1884,7 +1886,7 @@ class _MainScreenState extends State<MainScreen>
                           child: const TextButton(
                               onPressed: null,
                               child: Padding(
-                                padding: EdgeInsets.fromLTRB(10, 3, 10, 3),
+                                padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
                                 child: Text(
                                   'Overview',
                                   style: TextStyle(
@@ -1904,7 +1906,7 @@ class _MainScreenState extends State<MainScreen>
                               },
                               child: Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(10, 3, 10, 3),
+                                    const EdgeInsets.fromLTRB(10, 2, 10, 2),
                                 child: Text(
                                   'Overview',
                                   style: TextStyle(
@@ -1981,7 +1983,7 @@ class _MainScreenState extends State<MainScreen>
                           child: const TextButton(
                               onPressed: null,
                               child: Padding(
-                                padding: EdgeInsets.fromLTRB(10, 3, 10, 3),
+                                padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
                                 child: Text(
                                   'Payment',
                                   style: TextStyle(
@@ -2002,7 +2004,7 @@ class _MainScreenState extends State<MainScreen>
                               },
                               child: Padding(
                                 padding:
-                                    const EdgeInsets.fromLTRB(10, 3, 10, 3),
+                                    const EdgeInsets.fromLTRB(10, 2, 10, 2),
                                 child: Text(
                                   'Payment',
                                   style: TextStyle(
@@ -2107,12 +2109,12 @@ class _MainScreenState extends State<MainScreen>
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  'N $paid',
+                                  '₦ $paid',
                                   style: TextStyle(
                                       fontSize: stext, color: mode.brightText1),
                                 ),
                                 Text(
-                                  'N $outbal',
+                                  '₦ $outbal',
                                   style: TextStyle(
                                       fontSize: stext, color: mode.brightText1),
                                 )
@@ -2261,6 +2263,97 @@ class _MainScreenState extends State<MainScreen>
                             children: wids()),
                       ),
                     );
+                  }
+
+                  Widget InstallmentWid() {
+                    if (installments.length > 0) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            child: Text(
+                              'Installments',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: mode.brightText1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          inswid(),
+                        ],
+                      );
+                    } else {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            child: Text(
+                              'Installments',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: mode.brightText1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "No Installments Yet",
+                            style: TextStyle(color: mode.dimText1),
+                          ),
+                          SizedBox(height: 10)
+                        ],
+                      );
+                    }
+                  }
+
+                  Widget InstallmentWid2() {
+                    if (installments.length > 0) {
+                      return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              child: Text(
+                                'Installments',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: mode.brightText1,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 10,
+                            ),
+                            inswid(),
+                          ]);
+                    } else {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            child: Text(
+                              'Installments',
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: mode.brightText1,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          Text(
+                            "No Installments Yet",
+                            style: TextStyle(color: mode.dimText1),
+                          )
+                        ],
+                      );
+                    }
                   }
 
                   Widget loantitle() {
@@ -2670,15 +2763,15 @@ class _MainScreenState extends State<MainScreen>
                     double conheight = 0;
                     double conheight2 = 0;
                     if (myWidth < 768) {
-                      conheight = myHeight - ((myWidth - 20) / 2.263) - 173;
-                      conheight2 = myHeight - ((myWidth - 20) / 2.263) - 173;
+                      conheight = myHeight - ((myWidth - 20) / 2.263) - 173.7;
+                      conheight2 = myHeight - ((myWidth - 20) / 2.263) - 173.7;
                       if (myHeight < 580) {
                         conheight = myHeight - (100) - 173;
                         conheight2 = myHeight - (100) - 173;
                       }
                     } else {
-                      conheight = myHeight - 327;
-                      conheight2 = myHeight - 327;
+                      conheight = myHeight - 327.7;
+                      conheight2 = myHeight - 327.7;
                     }
                     if (_index == 0) {
                       if (myWidth < 768) {
@@ -2702,19 +2795,7 @@ class _MainScreenState extends State<MainScreen>
                               ActiveLoans(),
                               //container 2
                               const SizedBox(height: 10),
-                              Container(
-                                child: Text(
-                                  'Installments',
-                                  style: TextStyle(
-                                    fontSize: 15,
-                                    color: mode.brightText1,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              inswid(),
+                              InstallmentWid(),
                               const SizedBox(
                                 height: 10,
                               ),
@@ -2776,24 +2857,7 @@ class _MainScreenState extends State<MainScreen>
                                       SizedBox(
                                         width: 20,
                                       ),
-                                      Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              child: Text(
-                                                'Installments',
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  color: mode.brightText1,
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                            inswid(),
-                                          ]),
+                                      InstallmentWid2()
                                     ],
                                   ),
                                 ])));

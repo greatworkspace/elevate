@@ -1146,7 +1146,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                   Widget FundingBal() {
                     if (hidebal == false) {
                       return Text(
-                        'N ${humanizeNo(mysavings['balance'] - mysavings['lin'])}',
+                        '₦ ${humanizeNo(mysavings['balance'] - mysavings['lin'])}',
                         style:
                             TextStyle(fontSize: 11, color: Color(0xff127422)),
                       );
@@ -1357,6 +1357,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                       double height296 = 296;
                       double height80 = 80;
                       double height92 = 92;
+                      double height98 = 98;
                       double height7 = 7;
                       double font11 = 11.45;
                       double height10 = 10;
@@ -1365,11 +1366,13 @@ class _SavingsScreenState extends State<SavingsScreen>
                       double height20 = 20;
                       double height30 = 30;
                       double height65 = 65;
+                      double height75 = 75;
                       double font13 = 13;
                       if (myHeight < 580) {
                         height296 = 296;
                         height80 = 60;
                         height92 = 69;
+                        height98 = 74;
                         height7 = 5;
                         font11 = 7.45;
                         height10 = 5;
@@ -1378,6 +1381,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                         height20 = 10;
                         height30 = 17;
                         height65 = 45;
+                        height75 = 50;
                         font13 = 7.5;
                       }
                       return Container(
@@ -1401,12 +1405,12 @@ class _SavingsScreenState extends State<SavingsScreen>
                             Padding(
                               padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
                               child: SizedBox(
-                                width: height296,
+                                width: 314,
                                 child: Row(
                                   children: [
                                     Container(
                                       height: height80,
-                                      width: height92,
+                                      width: height98,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1441,7 +1445,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                     ),
                                     Container(
                                       height: height80,
-                                      width: height92,
+                                      width: height98,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1480,7 +1484,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                     ),
                                     Container(
                                       height: height80,
-                                      width: height92,
+                                      width: height98,
                                       decoration: BoxDecoration(
                                           color: mode.background1,
                                           borderRadius:
@@ -1533,7 +1537,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                     ),
                                   ),
                                   Container(
-                                    width: height65,
+                                    width: height75,
                                     height: height30,
                                     decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(5),
@@ -1597,7 +1601,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                               width: 15,
                                             ),
                                             SizedBox(
-                                              width: myWidth - 118,
+                                              width: myWidth - 126,
                                               child: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment
@@ -1661,7 +1665,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                               width: 15,
                                             ),
                                             SizedBox(
-                                              width: myWidth - 118,
+                                              width: myWidth - 126,
                                               child: Row(
                                                 mainAxisAlignment:
                                                     MainAxisAlignment

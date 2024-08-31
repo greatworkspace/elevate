@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'models/color.dart';
 import 'mainscreen.dart';
 import 'models/databaseHelper.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 dynamic getKey(key) {
   if (key == KeyClass.shakeKey2) {
@@ -265,14 +268,24 @@ class _LoanProductState extends State<LoanProduct> {
                                 height: 1.5,
                               ),
                             ),
-                            const TextSpan(
-                              text: 'www.elevatemfb.com',
+                            TextSpan(
+                              text: 'www.elevatemfb.com ',
                               style: TextStyle(
-                                color: Color(0xff8194DD),
+                                fontFamily: GoogleFonts.notoSans().fontFamily,
+                                color: const Color(0xff0080C8),
                                 fontSize: 12,
-                                height: 1.5,
                               ),
-                            )
+                              recognizer: TapGestureRecognizer()
+                                ..onTap = () async {
+                                  const url = 'https://elevatemfb.com';
+                                  if (await canLaunch(url)) {
+                                    await launch(url);
+                                  } else {
+                                    // Handle error if URL can't be launched
+                                    print('Could not launch $url');
+                                  }
+                                },
+                            ),
                           ]))
                         ],
                       ),

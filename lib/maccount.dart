@@ -300,7 +300,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -348,7 +348,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -395,7 +395,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -442,7 +442,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -490,7 +490,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -538,7 +538,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -585,7 +585,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: Row(
                                                   mainAxisAlignment:
                                                       MainAxisAlignment
@@ -633,7 +633,7 @@ class _MAccountScreenState extends State<MAccountScreen>
                                                 width: 30,
                                               ),
                                               SizedBox(
-                                                width: myWidth - 90,
+                                                width: myWidth - 97,
                                                 child: const Text(
                                                   'Sign Out',
                                                   style: TextStyle(

@@ -34,6 +34,8 @@ final List<Map<String, dynamic>> sourcetypes = [
 ];
 
 dynamic mode = mode;
+dynamic mysavings = null;
+bool hidebal = false;
 
 class _PayLoanState extends State<PayLoan> {
   dynamic mode = lightmode;
@@ -64,6 +66,20 @@ class _PayLoanState extends State<PayLoan> {
     }
   }
 
+  void gethidebal() async {
+    Map settings = await DatabaseHelper.instance.getSettings();
+    String? got = settings['hidebal'];
+    if (got == 'true') {
+      setState(() {
+        hidebal = true;
+      });
+    } else {
+      setState(() {
+        hidebal = false;
+      });
+    }
+  }
+
   void getIncentive() async {
     Map settings = await DatabaseHelper.instance.getSettings();
     String? incentivemode = settings['isincentive'];
@@ -83,6 +99,10 @@ class _PayLoanState extends State<PayLoan> {
     dynamic loan = await DatabaseHelper.instance.getLoan();
     dynamic saving = await DatabaseHelper.instance.getSaving();
 
+    setState(() {
+      mysavings = saving;
+    });
+
     return {
       'data': got,
       'loan': loan,
@@ -95,6 +115,7 @@ class _PayLoanState extends State<PayLoan> {
     getMode();
     initializeDateFormatting();
     getIncentive();
+    gethidebal();
     regetdata(context, mode);
   }
 
@@ -107,11 +128,24 @@ class _PayLoanState extends State<PayLoan> {
           final myWidth = constraints.maxWidth;
           // creating custom widgets
 
-
           Widget continuebtn;
 
           Widget greycontinue = TextButton(
-            onPressed: null,
+            onPressed: () async {
+              Future(() async {
+                User sets = await DatabaseHelper.instance.getUser();
+                String acc = sets.account;
+                String from = 'Savings Account / ' + acc;
+                await DatabaseHelper.instance.settrans(
+                    from,
+                    'Loan Account / Elevate Alliance',
+                    loanAmountCon.text,
+                    'Loan Installment');
+              }).then((value) {
+                action = 'payloan';
+                Navigator.of(context).pushNamed('EnterPin');
+              });
+            },
             style: ButtonStyle(
               backgroundColor: MaterialStateProperty.all<Color>(
                   Color.fromARGB(255, 195, 74, 74)),
@@ -164,6 +198,14 @@ class _PayLoanState extends State<PayLoan> {
 
           //scaffold body starts here
 
+          String FundingBal() {
+            if (hidebal == false) {
+              return '₦ ${humanizeNo(mysavings['balance'] - mysavings['lin'])}';
+            } else {
+              return '****';
+            }
+          }
+
           return FutureBuilder(
               future: mgetData(),
               builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
@@ -176,7 +218,6 @@ class _PayLoanState extends State<PayLoan> {
                   String name =
                       '${user.firstname} ${user.lastname} / EA Savings Wallet';
                   loanAmountCon.text = amount;
-                  String savingsBal = humanizeNo(savings['balance']);
                   if ((savings['balance'] - savings['lin']) >
                       loan['next_installment']) {
                     continuebtn = realcontinue;
@@ -327,7 +368,7 @@ class _PayLoanState extends State<PayLoan> {
                                                             const SizedBox(
                                                               width: 4,
                                                             ),
-                                                            Text(savingsBal,
+                                                            Text(FundingBal(),
                                                                 style: const TextStyle(
                                                                     color: Colors
                                                                         .white,
@@ -367,7 +408,6 @@ class _PayLoanState extends State<PayLoan> {
                                         controller: loanAmountCon,
                                         enabled: false,
                                         keyboardType: TextInputType.number,
-                                        
                                         style: TextStyle(
                                             color: mode.brightText1,
                                             fontSize: 14,

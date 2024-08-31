@@ -181,8 +181,8 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
             );
           }
 
-          Map item = targets.elementAt(targetD - 1);
-
+          Map item =
+              targets.where((element) => element['id'] == targetD).toList()[0];
           Widget TopCard() {
             if (myWidth < 767 && myHeight >= 580) {
               return Padding(
@@ -208,6 +208,11 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                         double btnWidth = iniwidth * 50 / 100 - 36;
                         double btnWidth2 = iniwidth * 50 / 100 - 36;
                         double btnHeight = (iniwidth * 60 / 100) / 7;
+                        double target_ratio =
+                            (item['balance'] / item['target']);
+                        if (target_ratio > 1) {
+                          target_ratio = 1;
+                        }
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -247,7 +252,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                             ),
                             SizedBox(
                               width: myWidth,
-                              height: 20,
+                              height: 21,
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -281,9 +286,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                                       children: [
                                         Container(
                                           height: 5,
-                                          width: (item['balance'] /
-                                                  item['target']) *
-                                              (myWidth - 62),
+                                          width: target_ratio * (myWidth - 62),
                                           decoration: const BoxDecoration(
                                               color: Colors.white,
                                               borderRadius: BorderRadius.only(
@@ -651,9 +654,9 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
           double height78 = 78;
           double height38 = 38;
           double pad10 = 10;
-          if(myHeight <= 580){
+          if (myHeight <= 580) {
             height78 = 58;
-          pad10 = 5;
+            pad10 = 5;
           }
 
           //scaffold body starts here
@@ -842,7 +845,7 @@ class _TargetSavingDetailsState extends State<TargetSavingDetails> {
                                     color: mode.background2,
                                     borderRadius: BorderRadius.circular(10)),
                                 child: Padding(
-                                  padding:  EdgeInsets.all(pad10),
+                                  padding: EdgeInsets.all(pad10),
                                   child: Row(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.center,

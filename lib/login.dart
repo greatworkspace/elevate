@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'shaker.dart';
 import 'dart:convert';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -15,6 +14,8 @@ import 'models/databaseHelper.dart';
 import 'models/user.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 const apiUrl = 'https://finx.ginnsltd.com/mobile/';
 const forgoturl = 'https://finx.ginnsltd.com/password/mail/send/';
@@ -73,6 +74,7 @@ class _LoginScreenState extends State<LoginScreen>
       deduction: user['auto_deduction'] ?? 'false',
     );
     String inv = user['inv'].toString();
+    print(user);
     await DatabaseHelper.instance.insertUser(usered);
     await DatabaseHelper.instance.insertLoan(user['loan']);
     await DatabaseHelper.instance.insertLoanP(user['loan_products']);
@@ -80,6 +82,7 @@ class _LoginScreenState extends State<LoginScreen>
     await DatabaseHelper.instance.insertInvestA(inv);
     await DatabaseHelper.instance.insertBeneficiary(user['beneficiary']);
     await DatabaseHelper.instance.insertNoti(user['notifications']);
+    await DatabaseHelper.instance.insertPlans(user['plans']);
     await DatabaseHelper.instance
         .insertSaving(user['savings'], user['transactions']);
     await DatabaseHelper.instance.insertInvest(
@@ -603,30 +606,50 @@ class _LoginScreenState extends State<LoginScreen>
                             ),
                             //Don't have an account
                             Container(
-                                child: RichText(
-                                    text: TextSpan(children: [
-                              TextSpan(
-                                  text: 'Visit ',
-                                  style: TextStyle(
-                                      fontFamily:
-                                          GoogleFonts.notoSans().fontFamily,
-                                      color: mode.brightText1,
-                                      fontSize: 12)),
-                              TextSpan(
-                                  text: 'www.elevatemfb.com ',
-                                  style: TextStyle(
-                                      fontFamily:
-                                          GoogleFonts.notoSans().fontFamily,
-                                      color: const Color(0xff0080C8),
-                                      fontSize: 12)),
-                              TextSpan(
-                                  text: 'to register  for Elevate Services',
-                                  style: TextStyle(
-                                      fontFamily:
-                                          GoogleFonts.notoSans().fontFamily,
-                                      color: mode.brightText1,
-                                      fontSize: 12))
-                            ])))
+                              child: RichText(
+                                text: TextSpan(
+                                  children: [
+                                    TextSpan(
+                                      text: 'Visit ',
+                                      style: TextStyle(
+                                        fontFamily:
+                                            GoogleFonts.notoSans().fontFamily,
+                                        color: mode.brightText1,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                    TextSpan(
+                                      text: 'www.elevatemfb.com ',
+                                      style: TextStyle(
+                                        fontFamily:
+                                            GoogleFonts.notoSans().fontFamily,
+                                        color: const Color(0xff0080C8),
+                                        fontSize: 12,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () async {
+                                          const url = 'https://elevatemfb.com';
+                                          if (await canLaunch(url)) {
+                                            await launch(url);
+                                          } else {
+                                            // Handle error if URL can't be launched
+                                            print('Could not launch $url');
+                                          }
+                                        },
+                                    ),
+                                    TextSpan(
+                                      text: 'to register for Elevate Services',
+                                      style: TextStyle(
+                                        fontFamily:
+                                            GoogleFonts.notoSans().fontFamily,
+                                        color: mode.brightText1,
+                                        fontSize: 12,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            )
                           ],
                         ),
                       ),

@@ -315,7 +315,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                   Row(
                                     children: [
                                       Text(
-                                        'N ' + humanizeNo(item['amount']),
+                                        '₦ ' + humanizeNo(item['amount']),
                                         style: TextStyle(
                                           color: mode.brightText1,
                                           fontSize: 15,
@@ -467,7 +467,7 @@ class _TransactionDetailsState extends State<TransactionDetails>
                                         ),
                                       ),
                                       Text(
-                                        'N ' + humanizeNo(item['charge']),
+                                        '₦ ' + humanizeNo(item['charge']),
                                         style: TextStyle(
                                           color: mode.brightText1,
                                           fontSize: 15,

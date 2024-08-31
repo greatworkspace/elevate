@@ -2,6 +2,9 @@ import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'models/databaseHelper.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/gestures.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class KeyClass {
   static const shakeKey1 = Key('__RIKEY1__');
@@ -159,12 +162,25 @@ class _PaySavings2State extends State<PaySavings2> {
                                           fontSize: 13,
                                           color: mode.brightText1,
                                         )),
-                                    const TextSpan(
-                                        text: 'www.elevatemfb.com',
-                                        style: TextStyle(
-                                          fontSize: 13,
-                                          color: Color(0xff008CC8),
-                                        ))
+                                    TextSpan(
+                                      text: 'www.elevatemfb.com ',
+                                      style: TextStyle(
+                                        fontFamily:
+                                            GoogleFonts.notoSans().fontFamily,
+                                        color: const Color(0xff0080C8),
+                                        fontSize: 12,
+                                      ),
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () async {
+                                          const url = 'https://elevatemfb.com';
+                                          if (await canLaunch(url)) {
+                                            await launch(url);
+                                          } else {
+                                            // Handle error if URL can't be launched
+                                            print('Could not launch $url');
+                                          }
+                                        },
+                                    ),
                                   ]),
                                 ),
                               ),

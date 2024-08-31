@@ -1,6 +1,5 @@
 // ignore_for_file: must_be_immutable
 
-
 import 'package:elevate/home.dart';
 import 'package:flutter/material.dart';
 import 'models/databaseHelper.dart';
@@ -22,10 +21,6 @@ dynamic getKey(key) {
 
 dynamic shakey = KeyClass.shakeKey1;
 
-
-
-
-
 class SecurityScreen extends StatefulWidget {
   SecurityScreen({
     required this.amode,
@@ -46,8 +41,6 @@ class _SecurityScreenState extends State<SecurityScreen> {
   final languageCon = TextEditingController();
   final modeCon = TextEditingController();
   final hiddenbalCon = TextEditingController();
-
-
 
   void gethidebal() async {
     Map settings = await DatabaseHelper.instance.getSettings();
@@ -90,12 +83,12 @@ class _SecurityScreenState extends State<SecurityScreen> {
                 inivalue = value;
               });
               if (value == true) {
-                 await DatabaseHelper.instance.sethide('true');
+                await DatabaseHelper.instance.sethide('true');
                 setState(() {
                   hiddenbalCon.text = 'true';
                 });
               } else {
-                 await DatabaseHelper.instance.sethide('false');
+                await DatabaseHelper.instance.sethide('false');
                 setState(() {
                   hiddenbalCon.text = 'false';
                 });
@@ -116,12 +109,12 @@ class _SecurityScreenState extends State<SecurityScreen> {
                   inivalue = value;
                 });
                 if (value == true) {
-                   await DatabaseHelper.instance.sethide('true');
+                  await DatabaseHelper.instance.sethide('true');
                   setState(() {
                     hiddenbalCon.text = 'true';
                   });
                 } else {
-                   await DatabaseHelper.instance.sethide('false');
+                  await DatabaseHelper.instance.sethide('false');
                   setState(() {
                     hiddenbalCon.text = 'false';
                   });
@@ -211,7 +204,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             width: 30,
                           ),
                           Container(
-                            width: myWidth - 90,
+                            width: myWidth - 97,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -246,7 +239,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             width: 30,
                           ),
                           Container(
-                            width: myWidth - 90,
+                            width: myWidth - 97,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -282,7 +275,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
                             width: 30,
                           ),
                           Container(
-                            width: myWidth - 90,
+                            width: myWidth - 97,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [

@@ -140,6 +140,7 @@ int accountI = 1;
 int savingsI = 1;
 int homeI = 1;
 int investI = 1;
+dynamic full_plan;
 int selectedindex = 0;
 String gotstate = '';
 
@@ -163,19 +164,19 @@ Future makeUser2(Map user) async {
   );
   String inv = user['inv'].toString();
   await DatabaseHelper.instance.makeAll(
-    usered,
-    user['loan'],
-    user['savings'],
-    user['transactions'],
-    user['investmentaccount']['investment'],
-    user['investmentaccount']['activity'],
-    user['bank'],
-    user['loan_products'],
-    inv,
-    user['beneficiary'],
-    user['notifications'],
-    user['officer'],
-  );
+      usered,
+      user['loan'],
+      user['savings'],
+      user['transactions'],
+      user['investmentaccount']['investment'],
+      user['investmentaccount']['activity'],
+      user['bank'],
+      user['loan_products'],
+      inv,
+      user['beneficiary'],
+      user['notifications'],
+      user['officer'],
+      user['plans']);
 }
 
 Future regetdata2() async {
@@ -331,6 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getMode();
+    regetdata2();
     selectedindex = widget.index;
   }
 
@@ -429,7 +431,8 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         backgroundColor: mode.background1,
         body: MediaQuery(
-          data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(0.95)),
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: TextScaler.linear(0.95)),
           child: SafeArea(child: LayoutBuilder(builder: (context, constraints) {
             final myHeight = constraints.maxHeight;
 
@@ -612,13 +615,12 @@ The Settings Screen Tab
                 onTap: (int index) {
                   setState(() {
                     selectedindex = index;
-                    
                   });
                   if (index == 3) {
                     setState(() {
-                        accountI = 1;
+                      accountI = 1;
                     });
-                    }
+                  }
                 },
                 currentIndex: selectedindex,
                 type: BottomNavigationBarType.fixed,
