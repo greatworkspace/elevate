@@ -269,23 +269,18 @@ class _LoanProductState extends State<LoanProduct> {
                               ),
                             ),
                             TextSpan(
-                              text: 'www.elevatemfb.com ',
-                              style: TextStyle(
-                                fontFamily: GoogleFonts.notoSans().fontFamily,
-                                color: const Color(0xff0080C8),
-                                fontSize: 12,
-                              ),
-                              recognizer: TapGestureRecognizer()
-                                ..onTap = () async {
-                                  const url = 'https://elevatemfb.com';
-                                  if (await canLaunch(url)) {
-                                    await launch(url);
-                                  } else {
-                                    // Handle error if URL can't be launched
-                                    print('Could not launch $url');
-                                  }
-                                },
-                            ),
+                                text: 'www.elevatemfb.com ',
+                                style: TextStyle(
+                                  fontFamily: GoogleFonts.notoSans().fontFamily,
+                                  color: const Color(0xff0080C8),
+                                  fontSize: 12,
+                                ),
+                                recognizer: TapGestureRecognizer()
+                                  ..onTap = () async {
+                                    final Uri url =
+                                        Uri.parse('https://elevatemfb.com');
+                                    await launchUrl(url);
+                                  }),
                           ]))
                         ],
                       ),

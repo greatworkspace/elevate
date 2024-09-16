@@ -83,6 +83,15 @@ class _SavingsScreenState extends State<SavingsScreen>
     }
   }
 
+  int istarget = 0;
+
+  void getistarget() async {
+    int istar = await DatabaseHelper.instance.getIsTarget();
+    setState(() {
+      istarget = istar;
+    });
+  }
+
   DateFormat dateFormat = DateFormat.yMMMMd();
   DateFormat timeFormat = DateFormat.jm();
 
@@ -182,6 +191,7 @@ class _SavingsScreenState extends State<SavingsScreen>
   void initState() {
     super.initState();
     gethidebal();
+    getistarget();
     dateFormat = new DateFormat.yMMMMd('en');
     timeFormat = new DateFormat.jm('en');
   }
@@ -1575,6 +1585,158 @@ class _SavingsScreenState extends State<SavingsScreen>
                         saveheight = myHeight - 319.2;
                       }
 
+                      Widget tabTarget() {
+                        if (istarget == 1) {
+                          return //Target Savings
+                              Padding(
+                            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: mode.background1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              height: 110,
+                              width: (myWidth - 40) / 2,
+                              child: SizedBox(
+                                child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      savingsI = 3;
+                                    });
+                                  },
+                                  child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 0, 10, 0),
+                                      child: Row(children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/target_savings.svg',
+                                            width: 86),
+                                        const SizedBox(
+                                          width: 15,
+                                        ),
+                                        SizedBox(
+                                          width: (myWidth / 2) - 157,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Target Savings',
+                                                    style: TextStyle(
+                                                        color: mode.brightText1,
+                                                        fontSize: 20),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Container(
+                                                    width: (myWidth / 2) - 180,
+                                                    child: Text(
+                                                      'Accomplish your savings goals faster and easier',
+                                                      style: TextStyle(
+                                                          color:
+                                                              mode.brightText1,
+                                                          fontSize: 13),
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                color: mode.brightText1,
+                                                size: 18,
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ])),
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return SizedBox();
+                        }
+                      }
+
+                      Widget mobileTarget() {
+                        if (istarget == 1) {
+                          return //Target Savings
+                              Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: mode.background1,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              height: 70,
+                              child: SizedBox(
+                                child: TextButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      savingsI = 3;
+                                    });
+                                  },
+                                  child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(
+                                          10, 0, 10, 0),
+                                      child: Row(children: [
+                                        SvgPicture.asset(
+                                            'assets/svg/target_savings.svg'),
+                                        const SizedBox(
+                                          width: 15,
+                                        ),
+                                        SizedBox(
+                                          width: myWidth - 126,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    'Target Savings',
+                                                    style: TextStyle(
+                                                        color: mode.brightText1,
+                                                        fontSize: 11),
+                                                  ),
+                                                  const SizedBox(height: 2),
+                                                  Text(
+                                                    'Accomplish your savings goals faster and easier',
+                                                    style: TextStyle(
+                                                        color: mode.brightText1,
+                                                        fontSize: 7),
+                                                  ),
+                                                ],
+                                              ),
+                                              Icon(
+                                                Icons.arrow_forward_ios,
+                                                color: mode.brightText1,
+                                                size: 18,
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ])),
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return SizedBox();
+                        }
+                      }
+
                       Widget saveList() {
                         if (myWidth < 768) {
                           return ListView(
@@ -1639,76 +1801,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                   ),
                                 ),
                               ),
-                              //Target Savings
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 0, 0, 10),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: mode.background1,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  height: 70,
-                                  child: SizedBox(
-                                    child: TextButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          savingsI = 3;
-                                        });
-                                      },
-                                      child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(
-                                              10, 0, 10, 0),
-                                          child: Row(children: [
-                                            SvgPicture.asset(
-                                                'assets/svg/target_savings.svg'),
-                                            const SizedBox(
-                                              width: 15,
-                                            ),
-                                            SizedBox(
-                                              width: myWidth - 126,
-                                              child: Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: [
-                                                  Column(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .center,
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        'Target Savings',
-                                                        style: TextStyle(
-                                                            color: mode
-                                                                .brightText1,
-                                                            fontSize: 11),
-                                                      ),
-                                                      const SizedBox(height: 2),
-                                                      Text(
-                                                        'Accomplish your savings goals faster and easier',
-                                                        style: TextStyle(
-                                                            color: mode
-                                                                .brightText1,
-                                                            fontSize: 7),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Icon(
-                                                    Icons.arrow_forward_ios,
-                                                    color: mode.brightText1,
-                                                    size: 18,
-                                                  )
-                                                ],
-                                              ),
-                                            ),
-                                          ])),
-                                    ),
-                                  ),
-                                ),
-                              ),
+                              mobileTarget()
                             ],
                           );
                         } //for tablets
@@ -1788,89 +1881,7 @@ class _SavingsScreenState extends State<SavingsScreen>
                                   ),
                                 ]),
                               ),
-                              Row(children: [
-                                //Target Savings
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: mode.background1,
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    height: 110,
-                                    width: (myWidth - 40) / 2,
-                                    child: SizedBox(
-                                      child: TextButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            savingsI = 3;
-                                          });
-                                        },
-                                        child: Padding(
-                                            padding: const EdgeInsets.fromLTRB(
-                                                10, 0, 10, 0),
-                                            child: Row(children: [
-                                              SvgPicture.asset(
-                                                  'assets/svg/target_savings.svg',
-                                                  width: 86),
-                                              const SizedBox(
-                                                width: 15,
-                                              ),
-                                              SizedBox(
-                                                width: (myWidth / 2) - 157,
-                                                child: Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment
-                                                          .spaceBetween,
-                                                  children: [
-                                                    Column(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          'Target Savings',
-                                                          style: TextStyle(
-                                                              color: mode
-                                                                  .brightText1,
-                                                              fontSize: 20),
-                                                        ),
-                                                        const SizedBox(
-                                                            height: 2),
-                                                        Container(
-                                                          width: (myWidth / 2) -
-                                                              180,
-                                                          child: Text(
-                                                            'Accomplish your savings goals faster and easier',
-                                                            style: TextStyle(
-                                                                color: mode
-                                                                    .brightText1,
-                                                                fontSize: 13),
-                                                            overflow:
-                                                                TextOverflow
-                                                                    .ellipsis,
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    Icon(
-                                                      Icons.arrow_forward_ios,
-                                                      color: mode.brightText1,
-                                                      size: 18,
-                                                    )
-                                                  ],
-                                                ),
-                                              ),
-                                            ])),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ]),
+                              Row(children: [tabTarget()]),
                             ],
                           );
                         }

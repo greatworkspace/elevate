@@ -176,7 +176,8 @@ Future makeUser2(Map user) async {
       user['beneficiary'],
       user['notifications'],
       user['officer'],
-      user['plans']);
+      user['plans'],
+      user['is_target']);
 }
 
 Future regetdata2() async {

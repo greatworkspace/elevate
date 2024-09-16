@@ -25,7 +25,7 @@ class DatabaseHelper {
       return databaseFactory.openDatabase(
           join(await getDatabasesPath(), 'data.db'),
           options: OpenDatabaseOptions(
-              version: 1,
+              version: 4,
               onCreate: (db, version) async {
                 await db.execute(
                     'CREATE TABLE user(id INTEGER, image TEXT, token TEXT, firstname TEXT, lastname TEXT, address TEXT, gender TEXT, nationality TEXT, phone TEXT, email TEXT, identification TEXT, kin TEXT, marital TEXT, account TEXT, deduction TEXT)');
@@ -60,12 +60,17 @@ class DatabaseHelper {
                 await db.execute(
                     'CREATE TABLE notification(id INTEGER, body TEXT, feedtype TEXT, mytime TEXT, status TEXT)');
                 await db.execute(
-                    'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                    'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                await db.execute('CREATE TABLE is_target(is_target BOOLEAN)');
               },
               onUpgrade: (db, oldVersion, newVersion) async {
                 if (oldVersion < 2) {
                   await db.execute(
-                      'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                      'CREATE TABLE IF NOT EXISTS plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                }
+                if (oldVersion < 4) {
+                  await db.execute(
+                      'CREATE TABLE IF NOT EXISTS is_target(is_target BOOLEAN)');
                 }
               }));
     } else {
@@ -74,7 +79,7 @@ class DatabaseHelper {
       return databaseFactory.openDatabase(
           join(await getDatabasesPath(), 'data.db'),
           options: OpenDatabaseOptions(
-              version: 2,
+              version: 4,
               onCreate: (db, version) async {
                 await db.execute(
                     'CREATE TABLE user(id INTEGER, image TEXT, token TEXT, firstname TEXT, lastname TEXT, address TEXT, gender TEXT, nationality TEXT, phone TEXT, email TEXT, identification TEXT, kin TEXT, marital TEXT, account TEXT, deduction TEXT)');
@@ -109,12 +114,17 @@ class DatabaseHelper {
                 await db.execute(
                     'CREATE TABLE notification(id INTEGER, body TEXT, feedtype TEXT, mytime TEXT, status TEXT)');
                 await db.execute(
-                    'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                    'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                await db.execute('CREATE TABLE is_target(is_target BOOLEAN)');
               },
               onUpgrade: (db, oldVersion, newVersion) async {
                 if (oldVersion < 2) {
                   await db.execute(
-                      'CREATE TABLE plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount, FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                      'CREATE TABLE IF NOT EXISTS plans(id INTEGER, name TEXT, interest FLOAT, eligible TEXT, interest_gain_period TEXT, interest_threshold FLOAT, interest_type TEXT, fees_on_withdrawal FLOAT, savings_fee FLOAT, duration INTEGER, active TEXT, penalty FLOAT, max_amount FLOAT, min_amount FLOAT, withholding_tax FLOAT, interest_destination TEXT, roll_over BOOLEAN)');
+                }
+                if (oldVersion < 4) {
+                  await db.execute(
+                      'CREATE TABLE IF NOT EXISTS is_target(is_target BOOLEAN)');
                 }
               }));
     }
@@ -524,6 +534,37 @@ class DatabaseHelper {
     return true;
   }
 
+  insertIsTarget(
+    bool is_target,
+  ) async {
+    final db = await database;
+    final batch = db.batch();
+    await db.execute('delete from is_target');
+    int istarget;
+    if (is_target == true) {
+      istarget = 1;
+    } else {
+      istarget = 0;
+    }
+    batch.insert(
+      'is_target',
+      {"is_target": istarget},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    await batch.commit(noResult: true);
+    return true;
+  }
+
+  Future<dynamic> getIsTarget() async {
+    final db = await database;
+    List<Map> loanL = await db.rawQuery('SELECT * FROM is_target');
+    if (loanL.length > 0) {
+      return (loanL[0]["is_target"]);
+    } else {
+      return false;
+    }
+  }
+
   insertSaving(Map<String, Object?> saving, List<dynamic> trans) async {
     final db = await database;
     await db.execute('delete from saving');
@@ -630,6 +671,7 @@ class DatabaseHelper {
     List<dynamic> noti,
     dynamic officer,
     dynamic plans,
+    bool is_target,
   ) async {
     final db = await database;
 
@@ -642,6 +684,7 @@ class DatabaseHelper {
     batch.execute('delete from loanP');
     batch.execute('delete from loan');
     batch.execute('delete from installment');
+    batch.execute('delete from is_target');
 
     if (loan['id'] != null) {
       dynamic installments = loan['loan_installments'];
@@ -664,6 +707,17 @@ class DatabaseHelper {
     batch2.insert(
       'investmentAccount',
       {'account': investA},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    int istarget;
+    if (is_target == true) {
+      istarget = 1;
+    } else {
+      istarget = 0;
+    }
+    batch2.insert(
+      'is_target',
+      {"is_target": istarget},
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
 
